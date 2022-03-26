@@ -1,0 +1,11 @@
+.vs/
+.vscode/
+
+bin/
+obj/
+
+example/
+out_tfc/
+out_textures/
+
+py/
