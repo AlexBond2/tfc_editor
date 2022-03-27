@@ -9,8 +9,9 @@ namespace PaladinsTfc
   class Program
   {
     private static bool logPeekTexData = true;
-    private static bool logTexDataMake = true;
+    private static bool logTexDataMake = false;
     private static bool logTexData = false;
+    private static bool checkCompression = true;
     private static bool writeTexture = false;
     private static bool compareReplacement = true;
 
@@ -72,11 +73,12 @@ namespace PaladinsTfc
     private static void printpeek(FileStream fs, int nPeek){
       if( logPeekTexData == false ) return;
 
+      long loc = fs.Position;
       byte[] bs = new byte[nPeek];
       fs.Read(bs, 0, (int)nPeek);
       fs.Seek(-((long)nPeek), SeekOrigin.Current);
 
-      string sx = "F[0x" + fs.Position.ToString("X8") + "] =";
+      string sx = "F[0x" + loc.ToString("X8") + "] =";
       Console.WriteLine(sx + peek(bs, nPeek));
     }
 
@@ -320,6 +322,7 @@ namespace PaladinsTfc
       } else {
         Console.WriteLine(String.Format("Texture {0} is too small, skipping", tex.id));
       }
+      GC.Collect();
     }
 
     //Does not update tfcInfo
@@ -353,8 +356,6 @@ namespace PaladinsTfc
       foreach (TexBlock block in tex.blocks) {
         byte[] readBlock = new byte[block.originalSize];
         fsImg.Read(readBlock, 0, block.originalSize);
-        readBlock[0] = readBlock[0];
-        readBlock[readBlock.Length-1] = readBlock[readBlock.Length - 1];
 
         /*
         byte[] readBlock2 = File.ReadAllBytes(replacementDDSPath).Skip(0x80).ToArray();
@@ -363,17 +364,17 @@ namespace PaladinsTfc
         } else {}*/
 
         //Console.WriteLine(readBlock[readBlock.Length-1] + " pos:" + fsImg.Position.ToString("X8") + " siz:" + readBlock.Length.ToString("X8"));
-        //printpeek(fsImg,32);
 
         byte[] lzo999compressed = lzo.Compress(readBlock);
         int newSize = lzo999compressed.Length;
 
-        byte[] recompress = lzo.Decompress(lzo999compressed, block.originalSize);
-        byte[] x = new byte[recompress.Length];
-        if (Enumerable.SequenceEqual(readBlock, x)) {
-          Console.WriteLine("Compression works");
-        } else{
-          throw new Exception("Internal Compression Failure");
+        if (checkCompression){  
+          byte[] recompress = lzo.Decompress(lzo999compressed, readBlock.Length);
+          if (Enumerable.SequenceEqual(readBlock, recompress)) {
+            Console.WriteLine("Compression works");
+          } else{
+            throw new Exception("Internal Compression Failure");
+          }
         }
         
         fs.Seek(block.loc_compressedSize, SeekOrigin.Begin);
@@ -413,6 +414,8 @@ namespace PaladinsTfc
         tex.totalTextureBytes.ToString("X8"), 
         nWrittenBytes.ToString("X8")
       ));
+
+      //GC.Collect();
     }
     
     // ====================================================== //
@@ -424,6 +427,7 @@ namespace PaladinsTfc
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
       LZOCompressor lzo = new LZOCompressor();
+      tf.texs.RemoveRange(200, tf.texs.Count()-200-1);
       foreach (Tex tex in tf.texs) {
         dumpTex(tex, fsIn, lzo, inFile);
       }
@@ -432,15 +436,14 @@ namespace PaladinsTfc
       string outFile = "out_tfc/CharTextures3PATCH.tfc";
       File.Copy(inFile, outFile, true);
       FileStream fsOut = new FileStream(outFile, FileMode.Open);
-      //replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
+      replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
-      //dumpTex(tf.texs[122], fsOut, lzo, "_"+inFile);
       replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");
       //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
       fsOut.Close();
 
-      Console.WriteLine("DONE, VERIFYING");
+      Console.WriteLine("DONE, NO VERIFYING");
       
       /*
       TFCInfo tfVerify = getTFCInfo(outFile);

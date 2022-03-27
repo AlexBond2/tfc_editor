@@ -50,10 +50,17 @@ namespace Lzo64 {
 
     public string VersionDate => LZOCompressor.lzo_version_date();
 
+    private bool Is64Bit(){
+      if (!this._calculated){
+        this._is64bit = IntPtr.Size == 8;
+        this._calculated = true;
+      }
+      return this._is64bit;
+    }
+
     public byte[] Compress(byte[] src){
       byte[] buf = new byte[src.Length + src.Length / 16 + 64 + 3];
       byte[] destinationArray;
-      Console.WriteLine("buf:"+buf);
       //byte[] buffer = new byte[src.Length + src.Length / 64 + 16 + 3 + 4];
       int dst_len = 0;
       if (this.Is64Bit()) {
@@ -63,24 +70,12 @@ namespace Lzo64 {
         LZOCompressor.lzo1x_999_compress32(src, src.Length, buf, ref dst_len, this._workMemory);
       }
       destinationArray = new byte[dst_len];
-      Console.WriteLine("dstlen:"+destinationArray.Length.ToString("X8"));
+      /*Console.WriteLine("dstlen:"+destinationArray.Length.ToString("X8"));
       Console.WriteLine("buf[0]:"+buf[0]);
       Console.WriteLine("buf:"+ (buf == null));
-      Console.WriteLine("buf:" + buf);
-      Array.Copy(
-        buf, 0, 
-        destinationArray, 0, 
-        dst_len
-      );
+      Console.WriteLine("buf:" + buf);*/
+      Array.Copy(buf, 0, destinationArray, 0, dst_len);
       return destinationArray;
-    }
-
-    private bool Is64Bit(){
-      if (!this._calculated){
-        this._is64bit = IntPtr.Size == 8;
-        this._calculated = true;
-      }
-      return this._is64bit;
     }
 
     public byte[] Decompress(byte[] src, int origlen){
