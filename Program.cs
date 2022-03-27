@@ -397,7 +397,7 @@ namespace PaladinsTfc
       string outFile = "out_tfc/CharTextures3PATCH.tfc";
       File.Copy(inFile, outFile, true);
       FileStream fsOut = new FileStream(outFile, FileMode.Open);
-      replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
+      //replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");
