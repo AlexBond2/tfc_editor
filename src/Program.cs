@@ -1,13 +1,17 @@
 ﻿using Lzo64;
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PaladinsTfc
 {
   class Program
   {
     private static bool logPeekTexData = true;
+    private static bool logTexDataMake = false;
     private static bool logTexData = false;
+    private static bool checkCompression = true;
     private static bool writeTexture = false;
     private static bool compareReplacement = true;
 
@@ -69,11 +73,12 @@ namespace PaladinsTfc
     private static void printpeek(FileStream fs, int nPeek){
       if( logPeekTexData == false ) return;
 
+      long loc = fs.Position;
       byte[] bs = new byte[nPeek];
       fs.Read(bs, 0, (int)nPeek);
       fs.Seek(-((long)nPeek), SeekOrigin.Current);
 
-      string sx = "F[0x" + fs.Position.ToString("X8") + "] =";
+      string sx = "F[0x" + loc.ToString("X8") + "] =";
       Console.WriteLine(sx + peek(bs, nPeek));
     }
 
@@ -108,9 +113,11 @@ namespace PaladinsTfc
           fs.Seek(-3L, SeekOrigin.Current);
         long loc_textureStart = fs.Position;
 
-        Console.WriteLine("FOUND tex " + texs.Count() + " at 0x" + loc_textureStart.ToString("X8") + " (searched from 0x" + loc_searchStart.ToString("X8") + ")");
-        printpeek(fs, 32);
-        Console.WriteLine("Begin blocks");
+        if(logTexDataMake) {
+          Console.WriteLine("FOUND tex " + texs.Count + " at 0x" + loc_textureStart.ToString("X8") + " (searched from 0x" + loc_searchStart.ToString("X8") + ")");
+          printpeek(fs, 32);
+          Console.WriteLine("Begin blocks");
+        }
         
         Tex tex = new Tex();
         tex.loc = fs.Position;
@@ -121,7 +128,7 @@ namespace PaladinsTfc
         tex.loc_unknown2 = fs.Position;
         tex.unknown2 = br.ReadInt32(); 
         tex.loc_blockHeaderStart = fs.Position;
-        tex.id = texs.Count();
+        tex.id = texs.Count;
 
         tex.blocks = new List<TexBlock>();
         int remaningBytes = tex.totalTextureBytes;
@@ -136,23 +143,25 @@ namespace PaladinsTfc
           remaningBytes -= block.compressedSize;
         }
 
-        Console.WriteLine(String.Format("tex {0} @ {1}, NBLOCKS = {2}, NBYTE = {3}, BLOCKHEADER = {4}, LOC:TEXNBYTE = {5}",
-          tex.id,
-          "0x"+tex.loc.ToString("X8"), 
-          tex.blocks.Count(), 
-          "0x"+tex.totalTextureBytes.ToString("X8"),
-          "0x"+tex.loc_blockHeaderStart.ToString("X8"),          
-          "0x"+tex.loc_totalTextureBytes.ToString("X8")
-        ));
+        if (logTexDataMake){
+          Console.WriteLine(String.Format("tex {0} @ {1}, NBLOCKS = {2}, NBYTE = {3}, BLOCKHEADER = {4}, LOC:TEXNBYTE = {5}",
+            tex.id,
+            "0x" + tex.loc.ToString("X8"),
+            tex.blocks.Count,
+            "0x" + tex.totalTextureBytes.ToString("X8"),
+            "0x" + tex.loc_blockHeaderStart.ToString("X8"),
+            "0x" + tex.loc_totalTextureBytes.ToString("X8")
+          ));
+        }
 
         long offset = 0;
-        for (int i = 0; i < tex.blocks.Count(); i++){
-          tex.blocks[i].loc_texBlockStart = tex.loc_blockHeaderStart + tex.blocks.Count()*8 + offset;
+        for (int i = 0; i < tex.blocks.Count; i++){
+          tex.blocks[i].loc_texBlockStart = tex.loc_blockHeaderStart + tex.blocks.Count*8 + offset;
           offset += tex.blocks[i].compressedSize;
         }
-        TexBlock last = tex.blocks.Last();
+        TexBlock last = tex.blocks[tex.blocks.Count-1];
         long endoftexA = last.loc_texBlockStart + last.compressedSize;
-        long endoftexB = tex.loc_blockHeaderStart + tex.blocks.Count()*8 + tex.totalTextureBytes;
+        long endoftexB = tex.loc_blockHeaderStart + tex.blocks.Count*8 + tex.totalTextureBytes;
 
         //Console.WriteLine("loc_texBlockStart: 0x" + last.loc_texBlockStart.ToString("X8"));
         //Console.WriteLine("loc_blockHeaderStart: 0x" + tex.loc_blockHeaderStart.ToString("X8"));
@@ -168,7 +177,9 @@ namespace PaladinsTfc
         }/**/
 
         texs.Add(tex);
-        Console.WriteLine(string.Format("Tex {0} done, a' {1}", tex.id, tex.blocks.Count()));
+
+        if (logTexDataMake) 
+          Console.WriteLine(string.Format("Tex {0} done, a' {1}", tex.id, tex.blocks.Count()));
       }
 
       fs.Close();
@@ -192,10 +203,12 @@ namespace PaladinsTfc
       const int dxt1 = 0x31545844; //DXT1
       const int dxt2 = 0x35545844; //DXT5
 
-      if(tex.blocks.Count() >= 1 && tex.blocks[0].originalSize >= 0x0800) { //if texture too small this switch statement does not work
+      if(tex.blocks.Count >= 1 && tex.blocks[0].originalSize >= 0x0800) { //if texture too small this switch statement does not work
+        Console.WriteLine(String.Format("Dumping Texture {0}", tex.id));
+
         int ddsSize = tex.blocks[0].originalSize;
         int ddsFormat = -1;
-        switch (tex.blocks.Count()) {
+        switch (tex.blocks.Count) {
           case 2:
             ddsW = 512;
             ddsH = 512;
@@ -296,7 +309,7 @@ namespace PaladinsTfc
         bwDump.Write(ddsFormat);
         fsDump.Seek(40L, SeekOrigin.Current);
 
-        for (int i = 0; i < tex.blocks.Count(); ++i) {
+        for (int i = 0; i < tex.blocks.Count; ++i) {
           TexBlock block = tex.blocks[i];
 
           fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
@@ -309,86 +322,112 @@ namespace PaladinsTfc
       } else {
         Console.WriteLine(String.Format("Texture {0} is too small, skipping", tex.id));
       }
+      GC.Collect();
     }
 
+    //Does not update tfcInfo
     private static void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, string replacementDDSPath) {
       Tex tex = tfcinfo.texs[id];
       if (tex.id != id)
-        throw new Exception("RedundantDataException, tex id are wrong");
+        throw new Exception("RedundantDataException, tex id is wrong");
 
-      if(tex.blocks.Count() != 1)
-        throw new ArgumentException("[TODO ERROR] Can not work with texture containing more than 1 block YET => only replace 512x or smaller textures");
+      Console.WriteLine("Replacing tex " + tex.id +  " with " + replacementDDSPath);
 
-      //TODO? check if dds header is correct
-      byte[] rawread = File.ReadAllBytes(replacementDDSPath).Skip(0x80).ToArray(); //strip dds header
-      Console.WriteLine("Replacing tex " + tex.id + ":0" + " with " + replacementDDSPath);
-
-      TexBlock block = tex.blocks[0];
-      int blockId = 0;
-
-      if(rawread.Length != block.originalSize)
-        throw new Exception("replacement texture block is not the same size texture its trying to replace");
-
-      byte[] lzo999compressed = lzo.Compress(rawread);
-      int newSize = lzo999compressed.Length;
-      
-      if(newSize > block.compressedSize)
-        throw new Exception("replacement texture can not be sufficently compressed. Reducing noise in the texture should fix this");
-      
       fs.Seek(tex.loc, SeekOrigin.Begin);
       Console.Write("Replace pre :");
       printpeek(fs, 32);
 
-      //Write headers
-      fs.Seek(block.loc_compressedSize, SeekOrigin.Begin); 
-      byte[] injectCompressedSize = BitConverter.GetBytes(newSize);
-      fs.Write(injectCompressedSize, 0, 4);
+      long loc_texDataStart = tex.blocks[0].loc_texBlockStart;
 
-      fs.Seek(block.loc_originalSize, SeekOrigin.Begin); 
-      byte[] injectOriginalSize = BitConverter.GetBytes(block.originalSize); // originalsize should (probably) be unchanged for the replacement so this code does nothing. But it does make it more understandable.
-      fs.Write(injectOriginalSize, 0, 4);
+      foreach(TexBlock block in tex.blocks){ //overwrite whole source data with 0, this is maybe unneccesary but makes the output easier to diagnose
+        fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
+        fs.Write(new byte[block.compressedSize], 0, block.compressedSize); 
+      }
 
-      //Write data
-      fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
-      fs.Write(new byte[block.compressedSize], 0, block.compressedSize); //overwrite whole source data with 0, this is maybe unneccesary but makes the output easier to diagnose
-      fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
-      fs.Write(lzo999compressed, 0, newSize);
+      //TODO? check if dds header is correct
+      FileStream fsImg = new FileStream(replacementDDSPath, FileMode.Open);
+      //printpeek(fsImg,32);
+      fsImg.Seek(0x80, SeekOrigin.Begin);  //strip dds header
+      //printpeek(fsImg,32);
+      int imgLen = checked((int)fsImg.Length)-0x80;
+      long texWriteLoc = loc_texDataStart;
+      int nWrittenBytes = 0;
 
-      fs.Seek(tex.loc_totalTextureBytes, SeekOrigin.Begin); //MEGA ERROR for multiple block texs
-      fs.Write(injectCompressedSize, 0, 4);
+      foreach (TexBlock block in tex.blocks) {
+        byte[] readBlock = new byte[block.originalSize];
+        fsImg.Read(readBlock, 0, block.originalSize);
 
-      
+        /*
+        byte[] readBlock2 = File.ReadAllBytes(replacementDDSPath).Skip(0x80).ToArray();
+        if(!Enumerable.SequenceEqual(readBlock, readBlock2)){
+          throw new Exception("AAAAAAAAAAAAAAAAA");
+        } else {}*/
+
+        //Console.WriteLine(readBlock[readBlock.Length-1] + " pos:" + fsImg.Position.ToString("X8") + " siz:" + readBlock.Length.ToString("X8"));
+
+        byte[] lzo999compressed = lzo.Compress(readBlock);
+        int newSize = lzo999compressed.Length;
+
+        if (checkCompression){  
+          byte[] recompress = lzo.Decompress(lzo999compressed, readBlock.Length);
+          if (Enumerable.SequenceEqual(readBlock, recompress)) {
+            Console.WriteLine("Compression works");
+          } else{
+            throw new Exception("Internal Compression Failure");
+          }
+        }
+        
+        fs.Seek(block.loc_compressedSize, SeekOrigin.Begin);
+        fs.Write(BitConverter.GetBytes(newSize), 0, 4);
+
+        // originalsize should (probably) not be tampered with. This would only be usefull if there is way to override resolution
+        //fs.Seek(block.loc_originalSize, SeekOrigin.Begin); 
+        //fs.Write(BitConverter.GetBytes(block.originalSize), 0, 4); 
+
+        fs.Seek(texWriteLoc, SeekOrigin.Begin);
+        fs.Write(lzo999compressed, 0, newSize);
+        texWriteLoc += newSize;
+        nWrittenBytes += newSize;
+
+        /*Console.WriteLine(string.Format("uncompressed = 0x{0}: bytes: {1} -> {2}",
+          block.originalSize.ToString("X8"),
+          block.compressedSize.ToString("X8"),
+          newSize.ToString("X8")
+        ));*/
+      }
+      fsImg.Close();
+
+      if (nWrittenBytes > tex.totalTextureBytes) {
+        throw new Exception("replacement texture can not be sufficently compressed. Reducing noise in the texture should fix this, (Output is corrupted)"); 
+      }
+      fs.Seek(tex.loc_totalTextureBytes, SeekOrigin.Begin); 
+      fs.Write(BitConverter.GetBytes(nWrittenBytes), 0, 4);
+
       fs.Seek(tex.loc, SeekOrigin.Begin);
       Console.Write("Replace post:");
       printpeek(fs, 32);
 
       Console.WriteLine(string.Format(
-        "Replaced tex {0}:{1}, blockSize: 0x{2} -> 0x{3}, totalTextureBytes: 0x{4} -> 0x{5}\n", 
+        "Replaced tex {0} a' {1}, totalTextureBytes: 0x{2} -> 0x{3}\n", 
         tex.id,
-        blockId,
-        block.compressedSize.ToString("X8"), 
-        newSize.ToString("X8"),
-        tex.loc_totalTextureBytes.ToString("X8"),
-        newSize.ToString("X8")
+        tex.blocks.Count(),
+        tex.totalTextureBytes.ToString("X8"), 
+        nWrittenBytes.ToString("X8")
       ));
+
+      //GC.Collect();
     }
+    
     // ====================================================== //
-    private static void Main(string[] args) {
-      Dictionary<int,string> texid2file = new Dictionary<int, string>();
-      //texid2file.Add(121, null);
-      //texid2file.Add(122, null);
-      //texid2file.Add(122, "example/CharTextures3PATCH_122_512xDXT1.dds");
-      //texid2file.Add(123, null);
-      //texid2file.Add(124, null);
-      //testLZO();
-      
+    private static void Main(string[] args) {      
       if(args.Length == 0)
-        args = new String[1]{@"E:\BACKUP\wilux\git\paladins_tfc\example\CharTextures3PATCH.tfc"};
+        throw new ArgumentException("HOW TO USE");
       string inFile = args[0];
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
       LZOCompressor lzo = new LZOCompressor();
+      tf.texs.RemoveRange(200, tf.texs.Count()-200-1);
       foreach (Tex tex in tf.texs) {
         dumpTex(tex, fsIn, lzo, inFile);
       }
@@ -397,29 +436,24 @@ namespace PaladinsTfc
       string outFile = "out_tfc/CharTextures3PATCH.tfc";
       File.Copy(inFile, outFile, true);
       FileStream fsOut = new FileStream(outFile, FileMode.Open);
-      //replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
+      replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
       replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");
       //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
       fsOut.Close();
-    }
 
-    public static void testLZO(){
-      //int origLen = "0x0001152E";
-      LZOCompressor lzo = new LZOCompressor();
-      byte[] compressed = File.ReadAllBytes("SULFPIP_rawcompressed.bin");
-      byte[] decompressed = lzo.Decompress(compressed, 0x20000);
+      Console.WriteLine("DONE, NO VERIFYING");
+      
+      /*
+      TFCInfo tfVerify = getTFCInfo(outFile);
+      FileStream fsVerify = new FileStream(inFile, FileMode.Open);
+      foreach (Tex tex in tfVerify.texs) {
+        dumpTex(tex, fsVerify, lzo, outFile);
+      }
+      fsVerify.Close();*/
 
-      byte[] recompressed = lzo.Compress(decompressed);
-
-      Console.WriteLine(
-        "ORIGSIZE=0x" + compressed.Length.ToString("X8")
-        + "\nSRCSIZE=0x" + decompressed.Length.ToString("X8")
-        + "\nNEWSIZE=0x" + recompressed.Length.ToString("X8")
-      );
-
-      Environment.Exit(0);
+      Console.WriteLine("DONE");
     }
   }
 }

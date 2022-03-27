@@ -7,6 +7,18 @@
     <Nullable>enable</Nullable>
     <OutputPath>bin/Debug</OutputPath>
 
-    <Platforms>AnyCPU;x64</Platforms>
+    <Platforms>x64</Platforms>
+
+    <IsPublishable>False</IsPublishable>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Optimize>True</Optimize>
   </PropertyGroup>
 </Project>
