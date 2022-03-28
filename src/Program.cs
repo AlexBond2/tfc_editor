@@ -17,6 +17,10 @@ namespace PaladinsTfc
     private static bool writeTexture = false;
     private static bool compareReplacement = false;
 
+    private static string xfile;
+    private static string xdump;
+    private static string xreplace;
+
     private static HashSet<int> dumpRange;
     private static bool dumpAll;
 
@@ -440,23 +444,29 @@ namespace PaladinsTfc
         rootArgument, dumpOption, replaceOption
       };
       //rootCommand.Description = "TODO write description";
-      rootCommand.SetHandler((string inFile , string? dump, string? replace) =>{
+      rootCommand.SetHandler((string inFile , string dump, string replace) =>{
         Console.WriteLine($"The value for inFile is: {inFile}");
         Console.WriteLine($"The value for --dump is: {dump}");
         Console.WriteLine($"The value for --replace is: {replace}");
 
-        Dictionary<int, string> id2replacement = new Dictionary<int, string>(); 
-
-        setDumpRange(dump);
-        addReplacements(id2replacement, replace);
-
-        if(dump == null && id2replacement.Count() == 0){
-          throw new ArgumentException("No method supplied");
-        }
-        makeHappen(inFile, id2replacement);
+        xfile = inFile;
+        xdump = dump;
+        xreplace = replace;
       }, rootArgument, dumpOption, replaceOption);
 
       rootCommand.Invoke(args);
+
+      
+
+      Dictionary<int, string> id2replacement = new Dictionary<int, string>(); 
+
+      setDumpRange(xdump);
+      addReplacements(id2replacement, xreplace);
+
+      if(xdump == null && id2replacement.Count() == 0){
+        throw new ArgumentException("No method supplied");
+      }
+      makeHappen(xfile, id2replacement);
     }
 
     private static void addReplacements(Dictionary<int, string> id2replacement, string? str){
@@ -524,15 +534,14 @@ namespace PaladinsTfc
         string outFile = "out_tfc/"+Path.GetFileName(inFile);
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
-        foreach(KeyValuePair<int, string> kv in id2replacement){
+        /*foreach(KeyValuePair<int, string> kv in id2replacement){
           replaceTexture(tf, fsOut, lzo, kv.Key, kv.Value);
           //GC.Collect();
-        }
-        /*
-        replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");*/
+        }*/
+        replaceTexture(tf, fsOut, lzo, 121, "example/Test_1024xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 122, "example/Test_512xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 123, "example/Test_256xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 124, "example/Test_128xDXT1.dds");
         //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
         fsOut.Close();
 
