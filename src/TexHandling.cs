@@ -432,7 +432,7 @@ namespace PaladinsTfc
       }
       
       if(id2replacement!=null && id2replacement.Count() > 0){
-        LZOCompressor lzo = new LZOCompressor(); // LZOCompressor decompression corrupts memory for some magical reason
+        LZOCompressor lzo = new LZOCompressor(); // NEVER EVER EVER SHARE LZOCompressor from dump
         string outFile = "out_tfc/"+Path.GetFileName(inFile);
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
