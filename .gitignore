@@ -5,7 +5,13 @@ bin/
 obj/
 
 example/
+assets/
 out_tfc/
 out_textures/
 
 py/
+
+*.csproj.user
+*.sln
+Properties/
+paladins_tfc.csproj.user
