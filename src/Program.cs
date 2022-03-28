@@ -52,6 +52,7 @@ namespace PaladinsTfc
     }
 
     private static bool isInDumpRange(int x){
+      if (dumpRange == null) return false;
       return dumpAll || dumpRange.Contains(x);
     }
     private static bool tryRead(BinaryReader reader){
@@ -200,6 +201,7 @@ namespace PaladinsTfc
       return tfcinfo;
     }
 
+    //this garbage piece of shit code creates CLR memory misalignment something
     private static void dumpTex(Tex tex, FileStream fs, LZOCompressor lzo, string fileName){
       int ddsW = 512;
       int ddsH = 512;
@@ -329,7 +331,6 @@ namespace PaladinsTfc
       GC.Collect();
     }
 
-    //Does not update tfcInfo
     private static void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, string replacementDDSPath) {
       Tex tex = tfcinfo.texs[id];
       if (tex.id != id)
@@ -455,18 +456,13 @@ namespace PaladinsTfc
       }, rootArgument, dumpOption, replaceOption);
 
       rootCommand.Invoke(args);
-
-      
-
       Dictionary<int, string> id2replacement = new Dictionary<int, string>(); 
-
       setDumpRange(xdump);
       addReplacements(id2replacement, xreplace);
-
       if(xdump == null && id2replacement.Count() == 0){
         throw new ArgumentException("No method supplied");
       }
-      makeHappen(xfile, id2replacement);
+      applyOperations(xfile, id2replacement);
     }
 
     private static void addReplacements(Dictionary<int, string> id2replacement, string? str){
@@ -516,45 +512,31 @@ namespace PaladinsTfc
       }
     }
 
-    private static void makeHappen(string inFile, Dictionary<int,string> id2replacement){
+    private static void applyOperations(string inFile, Dictionary<int,string> id2replacement){
       Console.WriteLine("OPENING FILE");
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
       LZOCompressor lzo = new LZOCompressor();
-      //tf.texs.RemoveRange(200, tf.texs.Count()-200-1);
 
       foreach (Tex tex in tf.texs) {        
-        if(isInDumpRange(tex.id) == false) continue;
+        if(isInDumpRange(tex.id) == false) continue; 
         dumpTex(tex, fsIn, lzo, inFile);
       }
       fsIn.Close();
+      //NEVER EVER EVER REMOVE THIS
+      lzo = new LZOCompressor(); // LZOCompressor decompression corrupts memory for some magical reason
       
       if(id2replacement.Count() > 0){
+
         string outFile = "out_tfc/"+Path.GetFileName(inFile);
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
-        /*foreach(KeyValuePair<int, string> kv in id2replacement){
+        foreach(KeyValuePair<int, string> kv in id2replacement){
           replaceTexture(tf, fsOut, lzo, kv.Key, kv.Value);
-          //GC.Collect();
-        }*/
-        replaceTexture(tf, fsOut, lzo, 121, "example/Test_1024xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 122, "example/Test_512xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 123, "example/Test_256xDXT1.dds");
-        replaceTexture(tf, fsOut, lzo, 124, "example/Test_128xDXT1.dds");
-        //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
+        }
         fsOut.Close();
-
-        Console.WriteLine("DONE, NO VERIFYING");
       }
-      
-      /*
-      TFCInfo tfVerify = getTFCInfo(outFile);
-      FileStream fsVerify = new FileStream(inFile, FileMode.Open);
-      foreach (Tex tex in tfVerify.texs) {
-        dumpTex(tex, fsVerify, lzo, outFile);
-      }
-      fsVerify.Close();*/
 
       Console.WriteLine("DONE");
     }
