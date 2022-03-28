@@ -30,10 +30,10 @@ You should only attempt to replace textures in an untouched
 
 `tfc_editor myfile.tfc --dump 1,2,100-102` dump texture 1,2 and 100 to 102
 
-`tfc_editor myfile.tfc --dump @mydumplist.txt` reads `mydumplist.txt`, replaces newlines with `,` and uses that as an argument
+`tfc_editor myfile.tfc --dump ./mydumplist.txt` reads `mydumplist.txt`, replaces newlines with `,` and uses that as an argument
 
 `tfc_editor myfile.tfc --replace 5:mytextures/tex1override.dds` replace texture of id 5 with file located at `mytextures/tex1override.dds` 
 
 `tfc_editor myfile.tfc --replace 5:tex5.dds,6:tex6.dds` replace texture 5 with `tex5.dds` and 6 `tex5.dds`
 
-`tfc_editor myfile.tfc --dump @myreplacelist.txt` reads `myreplacelist.txt`, replaces newlines with ´,´ and uses that as an the argument
+`tfc_editor myfile.tfc --dump ./myreplacelist.txt` reads `myreplacelist.txt`, replaces newlines with ´,´ and uses that as an the argument
