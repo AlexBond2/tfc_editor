@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 
 namespace PaladinsTfc
 {
@@ -11,12 +13,12 @@ namespace PaladinsTfc
     private static bool logPeekTexData = true;
     private static bool logTexDataMake = false;
     private static bool logTexData = false;
-    private static bool checkCompression = true;
+    private static bool checkCompression = false;
     private static bool writeTexture = false;
-    private static bool compareReplacement = true;
+    private static bool compareReplacement = false;
 
-    private static int minDump = 120;
-    private static int maxDump = 130;
+    private static HashSet<int> dumpRange;
+    private static bool dumpAll;
 
     public class TexBlock {
       public long loc_compressedSize;
@@ -46,7 +48,7 @@ namespace PaladinsTfc
     }
 
     private static bool isInDumpRange(int x){
-      return (minDump <= x && x <= maxDump);
+      return dumpAll || dumpRange.Contains(x);
     }
     private static bool tryRead(BinaryReader reader){
       try{
@@ -195,8 +197,6 @@ namespace PaladinsTfc
     }
 
     private static void dumpTex(Tex tex, FileStream fs, LZOCompressor lzo, string fileName){
-      if(isInDumpRange(tex.id) == false) return;
-
       int ddsW = 512;
       int ddsH = 512;
 
@@ -281,7 +281,7 @@ namespace PaladinsTfc
             break;
         }
         
-        string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT2";
+        string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT5";
         string withoutExtension = Path.GetFileNameWithoutExtension(fileName);
         String outPath = string.Format("out_textures/{0}_{1}_{2}x{3}.dds", 
           withoutExtension, 
@@ -414,36 +414,130 @@ namespace PaladinsTfc
         tex.totalTextureBytes.ToString("X8"), 
         nWrittenBytes.ToString("X8")
       ));
-
-      //GC.Collect();
     }
     
     // ====================================================== //
-    private static void Main(string[] args) {      
-      if(args.Length == 0)
-        throw new ArgumentException("HOW TO USE");
-      string inFile = args[0];
+    private static void Main(string[] args) {   
+      Argument rootArgument = new Argument<string>(
+        name: "inFile",
+        description: "TFC file to work with"
+      );
+      //rootArgument.Arity = ArgumentArity.ExactlyOne;
+
+      Option dumpOption = new Option<String>(
+        aliases: new string[] { "--dump", "-d" },
+        description: "Comma-separated number(range)s | * | ./filepath.txt"
+      );
+      dumpOption.Arity = ArgumentArity.ExactlyOne;
+
+      Option replaceOption = new Option<String>(
+        aliases: new string[] { "--replace", "-r" },
+        description: "Comma-separated \"id:replacement.dds\" | ./filepath.txt"
+      );
+      replaceOption.Arity = ArgumentArity.ExactlyOne;
+
+      RootCommand rootCommand = new RootCommand{
+        rootArgument, dumpOption, replaceOption
+      };
+      //rootCommand.Description = "TODO write description";
+      rootCommand.SetHandler((string inFile , string? dump, string? replace) =>{
+        Console.WriteLine($"The value for inFile is: {inFile}");
+        Console.WriteLine($"The value for --dump is: {dump}");
+        Console.WriteLine($"The value for --replace is: {replace}");
+
+        Dictionary<int, string> id2replacement = new Dictionary<int, string>(); 
+
+        setDumpRange(dump);
+        addReplacements(id2replacement, replace);
+
+        if(dump == null && id2replacement.Count() == 0){
+          throw new ArgumentException("No method supplied");
+        }
+        makeHappen(inFile, id2replacement);
+      }, rootArgument, dumpOption, replaceOption);
+
+      rootCommand.Invoke(args);
+    }
+
+    private static void addReplacements(Dictionary<int, string> id2replacement, string? str){
+      if (str == null || str.Length == 0) return;
+      
+      foreach(string s in indirectParse(str)){
+        string[] sx = s.Split(":", 2);
+        if(sx.Length != 2) 
+          throw new ArgumentException($"Replacement \"{s}\" can not be parsed");
+        int id = int.Parse(sx[0]);
+        string path = sx[1].Trim('\"');
+        if(!File.Exists(path))
+          throw new ArgumentException($"Replacement texture \"{path}\" does not exist.");
+        id2replacement.Add(id, path);
+      }
+    }
+    private static void setDumpRange(string? str){
+      if (str == null || str.Length == 0) return;
+
+      dumpRange = new HashSet<int>();
+
+      foreach(string s in indirectParse(str)){
+        if (s == "*") {
+          dumpAll = true;
+        } else if (s.Contains("-")){
+          string[] strNums = s.Split("-");
+          if(strNums.Length != 2) 
+            throw new ArgumentException($"Dump range can not be parsed {s}");
+          int lowRange = int.Parse(strNums[0]);
+          int highRange = int.Parse(strNums[1]);
+          foreach (int idx in Enumerable.Range(lowRange, highRange-lowRange+1)){
+            dumpRange.Add(idx);
+          }
+        } else {
+          dumpRange.Add(int.Parse(s));
+        }
+      }
+    }
+    private static string[] indirectParse(string str){
+      if(str.StartsWith("./")){
+        string fpath = new string(str.Skip(2).ToArray());
+        string[] content = File.ReadAllLines(fpath);
+        Console.WriteLine($"Using {fpath} as argument");
+        return File.ReadAllLines(fpath);
+      } else {
+        return str.Split(",");
+      }
+    }
+
+    private static void makeHappen(string inFile, Dictionary<int,string> id2replacement){
+      Console.WriteLine("OPENING FILE");
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
       LZOCompressor lzo = new LZOCompressor();
-      tf.texs.RemoveRange(200, tf.texs.Count()-200-1);
-      foreach (Tex tex in tf.texs) {
+      //tf.texs.RemoveRange(200, tf.texs.Count()-200-1);
+
+      foreach (Tex tex in tf.texs) {        
+        if(isInDumpRange(tex.id) == false) continue;
         dumpTex(tex, fsIn, lzo, inFile);
       }
       fsIn.Close();
       
-      string outFile = "out_tfc/CharTextures3PATCH.tfc";
-      File.Copy(inFile, outFile, true);
-      FileStream fsOut = new FileStream(outFile, FileMode.Open);
-      replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
-      replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
-      replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
-      replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");
-      //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
-      fsOut.Close();
+      if(id2replacement.Count() > 0){
+        string outFile = "out_tfc/"+Path.GetFileName(inFile);
+        File.Copy(inFile, outFile, true);
+        FileStream fsOut = new FileStream(outFile, FileMode.Open);
+        foreach(KeyValuePair<int, string> kv in id2replacement){
+          replaceTexture(tf, fsOut, lzo, kv.Key, kv.Value);
+          //GC.Collect();
+        }
+        /*
+        replaceTexture(tf, fsOut, lzo, 121, "example/CharTextures3PATCH_122_1024xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 122, "example/CharTextures3PATCH_122_512xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 123, "example/CharTextures3PATCH_122_256xDXT1.dds");
+        replaceTexture(tf, fsOut, lzo, 124, "example/CharTextures3PATCH_122_128xDXT1.dds");*/
+        //replaceTexture(tf, fsw, lzox, 126, "example/Io_default_specular_512xDXT1.dds");
+        fsOut.Close();
 
-      Console.WriteLine("DONE, NO VERIFYING");
+        Console.WriteLine("DONE, NO VERIFYING");
+      }
       
       /*
       TFCInfo tfVerify = getTFCInfo(outFile);
