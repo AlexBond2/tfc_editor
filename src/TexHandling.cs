@@ -189,7 +189,7 @@ namespace PaladinsTfc
       tfcinfo.srcFile = tfcFile;
       tfcinfo.texs = texs;
 
-      Console.WriteLine(string.Format("TFC {0} done, contains {1} textures", tfcinfo.srcFile, tfcinfo.texs.Count()));
+      Console.WriteLine(string.Format("Indexed {0}, contains {1} textures", tfcinfo.srcFile, tfcinfo.texs.Count()));
       
       return tfcinfo;
     }
@@ -417,7 +417,6 @@ namespace PaladinsTfc
     public static void run(string inFile, Dictionary<int,string> arg_id2replacement, HashSet<int> arg_dumpRange){
       id2replacement = arg_id2replacement;
       dumpRange = arg_dumpRange;
-      Console.WriteLine("OPENING TFC FILE");
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
