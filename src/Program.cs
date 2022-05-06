@@ -11,45 +11,78 @@ namespace PaladinsTfc
 
     // ====================================================== //
     private static void Main(string[] args) {   
-      Argument rootArgument = new Argument<string>(
-        name: "inFile",
+      RootCommand rootCommand = new RootCommand();
+
+      Command openCommand = getOpenCommand();
+      Command hashCommand = getHashCommand();
+
+      rootCommand.AddCommand(openCommand);
+      rootCommand.AddCommand(hashCommand);
+      rootCommand.Invoke(args);
+    }
+
+    private static Command getHashCommand(){
+      Command hashCommand = new Command ("hash", "command for hashing images");
+
+      Argument folderArg = new Argument<string>(
+        name: "in directory",
+        description: "files to work with"
+      ); 
+
+      Command hashUmodelCommand = new Command ("umodel", "hash umodel exported images"){folderArg};
+      hashUmodelCommand.SetHandler((string inFolder) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.PNG);
+      }, folderArg);
+
+      Command hashExportedCommand = new Command ("exported", "hash exported dds images"){folderArg};
+      hashExportedCommand.SetHandler((string inFolder) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.DDS);
+      }, folderArg);
+
+      hashCommand.AddCommand(hashExportedCommand);
+      hashCommand.AddCommand(hashUmodelCommand);
+
+      return hashCommand;
+    }
+
+    private static Command getOpenCommand() {      
+      Argument openArgument = new Argument<string>(
+        name: "in file",
         description: "TFC file to work with"
-      );
-      //rootArgument.Arity = ArgumentArity.ExactlyOne;
+      ); //rootArgument.Arity = ArgumentArity.ExactlyOne;
 
       Option dumpOption = new Option<String>(
         aliases: new string[] { "--dump", "-d" },
-        description: "Comma-separated number(range)s | * | ./filepath.txt"
-      );
-      dumpOption.Arity = ArgumentArity.ExactlyOne;
+        description: "dumps the selected ids to dds files\nComma-separated number(range)s | * | ./filepath.txt"
+      ); dumpOption.Arity = ArgumentArity.ExactlyOne;
+
+      Option dumpHashOption = new Option<String>(
+        aliases: new string[] { "--dump-hash", "-dh" },
+        description: "dumps the hashes for selected ids\nComma-separated number(range)s | * | ./filepath.txt"
+      ); dumpOption.Arity = ArgumentArity.ExactlyOne;
 
       Option replaceOption = new Option<String>(
         aliases: new string[] { "--replace", "-r" },
         description: "Comma-separated \"id:replacement.dds\" | ./filepath.txt"
-      );
-      replaceOption.Arity = ArgumentArity.ExactlyOne;
+      ); replaceOption.Arity = ArgumentArity.ExactlyOne;
 
-      RootCommand rootCommand = new RootCommand{
-        rootArgument, dumpOption, replaceOption
-      };
-      //rootCommand.Description = "TODO write description";
-      rootCommand.SetHandler((string inFile , string dump, string replace) =>{
-        //Console.WriteLine($"The value for inFile is: {inFile}");
-        //Console.WriteLine($"The value for --dump is: {dump}");
-        //Console.WriteLine($"The value for --replace is: {replace}");
-        xfile = inFile;
-        xdump = dump;
-        xreplace = replace;
-      }, rootArgument, dumpOption, replaceOption);
-
-      rootCommand.Invoke(args);
-      Dictionary<int, string> id2replacement = getReplacements(xreplace);
-      HashSet<int> dumpRange = getDumpRange(xdump);
+      Command openCommand = new Command("open", "for tfc file operations") {
+        openArgument, dumpOption, replaceOption
+      }; openCommand.Description = "TODO write description";
       
-      if(xdump == null && id2replacement.Count() == 0){
-        throw new ArgumentException("No method supplied");
-      }
-      TexHandling.run(xfile, id2replacement, dumpRange);
+      var rootCommand = new RootCommand();
+
+      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replace, string dumpHashRange) => {
+        Console.WriteLine($"The value for inFile is: {inTfcFile}");
+        Console.WriteLine($"The value for --dump is: {dumpRangeStr}");
+        Console.WriteLine($"The value for --replace is: {replace}");
+        Console.WriteLine($"The value for --dump-hash is: {dumpHashRange}");
+        
+        Dictionary<int, string> id2replacement = getReplacements(replace);
+        HashSet<int> dumpRange = getDumpRange(dumpRangeStr);
+        TexHandling.run(inTfcFile, id2replacement, dumpRange);
+      }, openArgument, dumpOption, replaceOption, dumpHashOption);
+      return openCommand;
     }
 
     private static Dictionary<int, string> getReplacements(string? str){

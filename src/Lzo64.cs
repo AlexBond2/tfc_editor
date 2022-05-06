@@ -7,7 +7,7 @@ namespace Lzo64 {
     private const string LzoDll32Bit = "lzo2.dll";
     private const string LzoDll64Bit = "lzo2_64.dll";
     private static TraceSwitch _traceSwitch = new TraceSwitch("Simplicit.Net.Lzo", "Switch for tracing of the LZOCompressor-Class");
-    private byte[] _workMemory = new byte[0x20000];
+    private byte[] _workMemory = new byte[(14 * 16384L * sizeof(short))]; // source: https://github.com/nemequ/lzo/blob/master/include/lzo/lzo1x.h
     private bool _calculated;
     private bool _is64bit;
 
@@ -42,7 +42,8 @@ namespace Lzo64 {
     private static extern int __lzo_init_v2_32(uint v,int s1,int s2,int s3,int s4,int s5,int s6,int s7,int s8,int s9);
 
     public LZOCompressor(){
-      if ((!this.Is64Bit() ? LZOCompressor.__lzo_init_v2_32(1U, -1, -1, -1, -1, -1, -1, -1, -1, -1) : LZOCompressor.__lzo_init_v2(1U, -1, -1, -1, -1, -1, -1, -1, -1, -1)) != 0)
+      if (Is64Bit() == false) throw new Exception("Initialization of LZO-Compressor failed, System is not 64 bit");
+      if (LZOCompressor.__lzo_init_v2(1U, -1, -1, -1, -1, -1, -1, -1, -1, -1) != 0)
         throw new Exception("Initialization of LZO-Compressor failed !");
     }
 
@@ -63,17 +64,8 @@ namespace Lzo64 {
       byte[] destinationArray;
       //byte[] buffer = new byte[src.Length + src.Length / 64 + 16 + 3 + 4];
       int dst_len = 0;
-      if (this.Is64Bit()) {
-        LZOCompressor.lzo1x_999_compress(src, src.Length, buf, ref dst_len, this._workMemory);
-      }
-      else{
-        LZOCompressor.lzo1x_999_compress32(src, src.Length, buf, ref dst_len, this._workMemory);
-      }
+      LZOCompressor.lzo1x_999_compress(src, src.Length, buf, ref dst_len, this._workMemory);
       destinationArray = new byte[dst_len];
-      /*Console.WriteLine("dstlen:"+destinationArray.Length.ToString("X8"));
-      Console.WriteLine("buf[0]:"+buf[0]);
-      Console.WriteLine("buf:"+ (buf == null));
-      Console.WriteLine("buf:" + buf);*/
       Array.Copy(buf, 0, destinationArray, 0, dst_len);
       return destinationArray;
     }
@@ -81,10 +73,7 @@ namespace Lzo64 {
     public byte[] Decompress(byte[] src, int origlen){
       byte[] dst = new byte[origlen];
       int dst_len = origlen;
-      if (this.Is64Bit())
-        LZOCompressor.lzo1x_decompress(src, src.Length, dst, ref dst_len, this._workMemory);
-      else
-        LZOCompressor.lzo1x_decompress32(src, src.Length, dst, ref dst_len, this._workMemory);
+      LZOCompressor.lzo1x_decompress(src, src.Length, dst, ref dst_len, this._workMemory);
       return dst;
     }
   }
