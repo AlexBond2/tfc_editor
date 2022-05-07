@@ -7,6 +7,7 @@ namespace PaladinsTfc
   class Program
   {
     // ====================================================== //
+    [STAThread]
     private static void Main(string[] args) {   
       if (args.Length == 0)
         gui();
@@ -15,6 +16,7 @@ namespace PaladinsTfc
     }
 
     private static void gui(){
+      Application.EnableVisualStyles();
       Application.Run(new Gui());
     }
     private static void commandline(string[] args){

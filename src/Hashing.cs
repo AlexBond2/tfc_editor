@@ -30,7 +30,7 @@ namespace PaladinsTfc
       else throw new Exception ("can only open dds and png files");
 
       Regex rx = new Regex(@"[^a-zA-Z0-9_\-]",RegexOptions.Compiled | RegexOptions.IgnoreCase);
-      string dirpathSafe = rx.Replace(dirpath, "_");
+      string dirpathSafe = "TextureHashes_"+rx.Replace(dirpath, "_");
       string searchPattern = "*."+typeName;
       string outFile = $"out/{dirpathSafe}_{typeName}.json";
       DifferenceHash hasher = new DifferenceHash();
@@ -41,10 +41,11 @@ namespace PaladinsTfc
       var hashItems = new ConcurrentBag<HashItem>();
       Parallel.ForEach (imgPaths, path => {
         var img = getImg(path, imgType);
+        var relPath = Path.GetRelativePath(dirpath, path);
         ulong hash = hasher.Hash(img);
-        hashItems.Add(new HashItem(path,hash));
+        hashItems.Add(new HashItem(relPath,hash));
 
-        if (c % 1000 == 0) Console.WriteLine($"hashed {c}/{imgPaths.Length} ..{path}..");
+        if (c % 1000 == 0) Console.WriteLine($"hashed {c}/{imgPaths.Length} ..{relPath}..");
         c++;
       });
       Console.WriteLine($"successfully hashed all files");
