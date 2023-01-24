@@ -43,7 +43,7 @@ namespace PaladinsTfc
 
     private static bool isInDumpRange(int x){
       if (dumpRange == null) {
-        return false;
+        return true;
       } else {
         return dumpRange.Contains(x);
       }      
@@ -421,7 +421,7 @@ namespace PaladinsTfc
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
 
-      if (dumpRange != null){
+      if (true){
         LZOCompressor lzo = new LZOCompressor();
         foreach (Tex tex in tf.texs) {        
           if(isInDumpRange(tex.id) == false) continue; 

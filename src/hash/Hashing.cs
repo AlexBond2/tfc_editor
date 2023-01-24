@@ -6,6 +6,9 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
+using Pfim;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace PaladinsTfc
 {
@@ -57,6 +60,21 @@ namespace PaladinsTfc
     public static Img.Image<Img.PixelFormats.Rgba32> getImg(string path, ImgType imgType) {
       if (imgType == ImgType.PNG){
         return Img.Image.Load<Img.PixelFormats.Rgba32>(path);
+      } else if (imgType == ImgType.DDS) {
+        var pngPath = Path.ChangeExtension(path, ".png"); 
+        using (var image = Pfimage.FromFile(path)) {
+          var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned); 
+          try {
+            var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+            var bitmap = new Bitmap(image.Width, image.Height, image.Stride, PixelFormat.Format32bppArgb, data);
+            bitmap.Save(pngPath, System.Drawing.Imaging.ImageFormat.Png);
+          } finally {
+            handle.Free();
+          }
+          var img = Img.Image.Load<Img.PixelFormats.Rgba32>(pngPath);
+          File.Delete(pngPath);
+          return img;
+        }
       }
       return null;
     }

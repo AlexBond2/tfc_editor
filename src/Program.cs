@@ -113,7 +113,7 @@ namespace PaladinsTfc
     }
 
     private static HashSet<int> getDumpRange(string? str){
-      if (str == null || str.Length == 0) return null;
+      if (str == null || str.Length == 0) return new HashSet<int>();
 
       HashSet<int> dumpRange = new HashSet<int>();
 
