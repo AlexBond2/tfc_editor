@@ -29,12 +29,12 @@
     private void InitializeComponent()
     {
       this.textBox1 = new System.Windows.Forms.TextBox();
-      this.button1 = new System.Windows.Forms.Button();
-      this.button2 = new System.Windows.Forms.Button();
+      this.btnGenerateHashCooked = new System.Windows.Forms.Button();
+      this.btnSelectFileHashTFC = new System.Windows.Forms.Button();
       this.label1 = new System.Windows.Forms.Label();
       this.textBox2 = new System.Windows.Forms.TextBox();
       this.label3 = new System.Windows.Forms.Label();
-      this.button4 = new System.Windows.Forms.Button();
+      this.btnSelectDirectoryInput = new System.Windows.Forms.Button();
       this.buttonOperationAdd = new System.Windows.Forms.Button();
       this.button6 = new System.Windows.Forms.Button();
       this.button8 = new System.Windows.Forms.Button();
@@ -42,15 +42,17 @@
       this.button9 = new System.Windows.Forms.Button();
       this.textBox4 = new System.Windows.Forms.TextBox();
       this.label5 = new System.Windows.Forms.Label();
-      this.button7 = new System.Windows.Forms.Button();
+      this.btnSelectDirectoryOutput = new System.Windows.Forms.Button();
       this.richTextBox1 = new System.Windows.Forms.RichTextBox();
       this.textBox5 = new System.Windows.Forms.TextBox();
-      this.button10 = new System.Windows.Forms.Button();
+      this.btnSelectFileHashCooked = new System.Windows.Forms.Button();
       this.label6 = new System.Windows.Forms.Label();
       this.label7 = new System.Windows.Forms.Label();
-      this.button11 = new System.Windows.Forms.Button();
+      this.btnGenerateHashTFC = new System.Windows.Forms.Button();
       this.button3 = new System.Windows.Forms.Button();
       this.ddGrid = new System.Windows.Forms.DataGridView();
+      this.label2 = new System.Windows.Forms.Label();
+      this.button5 = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.ddGrid)).BeginInit();
       this.SuspendLayout();
       // 
@@ -62,32 +64,33 @@
       this.textBox1.Size = new System.Drawing.Size(226, 23);
       this.textBox1.TabIndex = 0;
       // 
-      // button1
+      // btnGenerateHashCooked
       // 
-      this.button1.Location = new System.Drawing.Point(533, 12);
-      this.button1.Name = "button1";
-      this.button1.Size = new System.Drawing.Size(170, 23);
-      this.button1.TabIndex = 1;
-      this.button1.Text = "Generate Source Hashes";
-      this.button1.UseVisualStyleBackColor = true;
+      this.btnGenerateHashCooked.Location = new System.Drawing.Point(533, 12);
+      this.btnGenerateHashCooked.Name = "btnGenerateHashCooked";
+      this.btnGenerateHashCooked.Size = new System.Drawing.Size(170, 23);
+      this.btnGenerateHashCooked.TabIndex = 1;
+      this.btnGenerateHashCooked.Text = "Generate Cooked Hashes";
+      this.btnGenerateHashCooked.UseVisualStyleBackColor = true;
+      this.btnGenerateHashCooked.Click += new System.EventHandler(this.btnGenerateHashCooked_Click);
       // 
-      // button2
+      // btnSelectFileHashTFC
       // 
-      this.button2.Location = new System.Drawing.Point(434, 41);
-      this.button2.Name = "button2";
-      this.button2.Size = new System.Drawing.Size(93, 23);
-      this.button2.TabIndex = 2;
-      this.button2.Text = "Select File";
-      this.button2.UseVisualStyleBackColor = true;
+      this.btnSelectFileHashTFC.Location = new System.Drawing.Point(434, 41);
+      this.btnSelectFileHashTFC.Name = "btnSelectFileHashTFC";
+      this.btnSelectFileHashTFC.Size = new System.Drawing.Size(93, 23);
+      this.btnSelectFileHashTFC.TabIndex = 2;
+      this.btnSelectFileHashTFC.Text = "Select File";
+      this.btnSelectFileHashTFC.UseVisualStyleBackColor = true;
       // 
       // label1
       // 
       this.label1.AutoSize = true;
       this.label1.Location = new System.Drawing.Point(106, 16);
       this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(90, 15);
+      this.label1.Size = new System.Drawing.Size(89, 15);
       this.label1.TabIndex = 3;
-      this.label1.Text = "UModel Hashes";
+      this.label1.Text = "Cooked Hashes";
       this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // textBox2
@@ -108,14 +111,14 @@
       this.label3.Text = "Input Directory";
       this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
-      // button4
+      // btnSelectDirectoryInput
       // 
-      this.button4.Location = new System.Drawing.Point(434, 70);
-      this.button4.Name = "button4";
-      this.button4.Size = new System.Drawing.Size(93, 23);
-      this.button4.TabIndex = 9;
-      this.button4.Text = "Select Folder";
-      this.button4.UseVisualStyleBackColor = true;
+      this.btnSelectDirectoryInput.Location = new System.Drawing.Point(434, 70);
+      this.btnSelectDirectoryInput.Name = "btnSelectDirectoryInput";
+      this.btnSelectDirectoryInput.Size = new System.Drawing.Size(93, 23);
+      this.btnSelectDirectoryInput.TabIndex = 9;
+      this.btnSelectDirectoryInput.Text = "Select Folder";
+      this.btnSelectDirectoryInput.UseVisualStyleBackColor = true;
       // 
       // buttonOperationAdd
       // 
@@ -138,7 +141,7 @@
       // 
       // button8
       // 
-      this.button8.Location = new System.Drawing.Point(12, 248);
+      this.button8.Location = new System.Drawing.Point(12, 262);
       this.button8.Name = "button8";
       this.button8.Size = new System.Drawing.Size(184, 23);
       this.button8.TabIndex = 14;
@@ -158,7 +161,7 @@
       // 
       // button9
       // 
-      this.button9.Location = new System.Drawing.Point(12, 277);
+      this.button9.Location = new System.Drawing.Point(12, 291);
       this.button9.Name = "button9";
       this.button9.Size = new System.Drawing.Size(184, 23);
       this.button9.TabIndex = 16;
@@ -183,23 +186,23 @@
       this.label5.Text = "Output Directory";
       this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
-      // button7
+      // btnSelectDirectoryOutput
       // 
-      this.button7.Location = new System.Drawing.Point(434, 99);
-      this.button7.Name = "button7";
-      this.button7.Size = new System.Drawing.Size(93, 23);
-      this.button7.TabIndex = 20;
-      this.button7.Text = "Select Folder";
-      this.button7.UseVisualStyleBackColor = true;
+      this.btnSelectDirectoryOutput.Location = new System.Drawing.Point(434, 99);
+      this.btnSelectDirectoryOutput.Name = "btnSelectDirectoryOutput";
+      this.btnSelectDirectoryOutput.Size = new System.Drawing.Size(93, 23);
+      this.btnSelectDirectoryOutput.TabIndex = 20;
+      this.btnSelectDirectoryOutput.Text = "Select Folder";
+      this.btnSelectDirectoryOutput.UseVisualStyleBackColor = true;
       // 
       // richTextBox1
       // 
       this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-      this.richTextBox1.Location = new System.Drawing.Point(12, 306);
+      this.richTextBox1.Location = new System.Drawing.Point(12, 364);
       this.richTextBox1.Name = "richTextBox1";
       this.richTextBox1.ReadOnly = true;
-      this.richTextBox1.Size = new System.Drawing.Size(184, 348);
+      this.richTextBox1.Size = new System.Drawing.Size(184, 290);
       this.richTextBox1.TabIndex = 21;
       this.richTextBox1.Text = "";
       // 
@@ -211,14 +214,14 @@
       this.textBox5.Size = new System.Drawing.Size(226, 23);
       this.textBox5.TabIndex = 22;
       // 
-      // button10
+      // btnSelectFileHashCooked
       // 
-      this.button10.Location = new System.Drawing.Point(434, 12);
-      this.button10.Name = "button10";
-      this.button10.Size = new System.Drawing.Size(93, 23);
-      this.button10.TabIndex = 23;
-      this.button10.Text = "Select File";
-      this.button10.UseVisualStyleBackColor = true;
+      this.btnSelectFileHashCooked.Location = new System.Drawing.Point(434, 12);
+      this.btnSelectFileHashCooked.Name = "btnSelectFileHashCooked";
+      this.btnSelectFileHashCooked.Size = new System.Drawing.Size(93, 23);
+      this.btnSelectFileHashCooked.TabIndex = 23;
+      this.btnSelectFileHashCooked.Text = "Select File";
+      this.btnSelectFileHashCooked.UseVisualStyleBackColor = true;
       // 
       // label6
       // 
@@ -241,14 +244,15 @@
       this.label7.Text = "TFC Hashes";
       this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
-      // button11
+      // btnGenerateHashTFC
       // 
-      this.button11.Location = new System.Drawing.Point(533, 41);
-      this.button11.Name = "button11";
-      this.button11.Size = new System.Drawing.Size(170, 23);
-      this.button11.TabIndex = 26;
-      this.button11.Text = "Generate TFC Hashes";
-      this.button11.UseVisualStyleBackColor = true;
+      this.btnGenerateHashTFC.Location = new System.Drawing.Point(533, 41);
+      this.btnGenerateHashTFC.Name = "btnGenerateHashTFC";
+      this.btnGenerateHashTFC.Size = new System.Drawing.Size(170, 23);
+      this.btnGenerateHashTFC.TabIndex = 26;
+      this.btnGenerateHashTFC.Text = "Generate TFC Hashes";
+      this.btnGenerateHashTFC.UseVisualStyleBackColor = true;
+      this.btnGenerateHashTFC.Click += new System.EventHandler(this.btnGenerateHashTFC_Click);
       // 
       // button3
       // 
@@ -272,31 +276,53 @@
       this.ddGrid.TabIndex = 28;
       this.ddGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ddGrid_CellContentClick);
       // 
+      // label2
+      // 
+      this.label2.AutoSize = true;
+      this.label2.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+      this.label2.Location = new System.Drawing.Point(12, 346);
+      this.label2.Name = "label2";
+      this.label2.Size = new System.Drawing.Size(27, 15);
+      this.label2.TabIndex = 29;
+      this.label2.Text = "Log";
+      this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      // 
+      // button5
+      // 
+      this.button5.Location = new System.Drawing.Point(12, 217);
+      this.button5.Name = "button5";
+      this.button5.Size = new System.Drawing.Size(184, 23);
+      this.button5.TabIndex = 30;
+      this.button5.Text = "Delete Operation";
+      this.button5.UseVisualStyleBackColor = true;
+      // 
       // Gui
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(1027, 710);
+      this.Controls.Add(this.button5);
+      this.Controls.Add(this.label2);
       this.Controls.Add(this.button6);
       this.Controls.Add(this.buttonOperationAdd);
       this.Controls.Add(this.ddGrid);
       this.Controls.Add(this.button3);
-      this.Controls.Add(this.button11);
+      this.Controls.Add(this.btnGenerateHashTFC);
       this.Controls.Add(this.label7);
-      this.Controls.Add(this.button10);
+      this.Controls.Add(this.btnSelectFileHashCooked);
       this.Controls.Add(this.textBox5);
       this.Controls.Add(this.richTextBox1);
-      this.Controls.Add(this.button7);
+      this.Controls.Add(this.btnSelectDirectoryOutput);
       this.Controls.Add(this.label5);
       this.Controls.Add(this.textBox4);
       this.Controls.Add(this.button9);
       this.Controls.Add(this.button8);
-      this.Controls.Add(this.button4);
+      this.Controls.Add(this.btnSelectDirectoryInput);
       this.Controls.Add(this.label3);
       this.Controls.Add(this.textBox2);
       this.Controls.Add(this.label1);
-      this.Controls.Add(this.button2);
-      this.Controls.Add(this.button1);
+      this.Controls.Add(this.btnSelectFileHashTFC);
+      this.Controls.Add(this.btnGenerateHashCooked);
       this.Controls.Add(this.textBox1);
       this.Controls.Add(this.label4);
       this.Controls.Add(this.label6);
@@ -312,12 +338,12 @@
     #endregion
 
     private TextBox textBox1;
-    private Button button1;
-    private Button button2;
+    private Button btnGenerateHashCooked;
+    private Button btnSelectFileHashTFC;
     private Label label1;
     private TextBox textBox2;
     private Label label3;
-    private Button button4;
+    private Button btnSelectDirectoryInput;
     private Button buttonOperationAdd;
     private Button button6;
     private Button button8;
@@ -325,14 +351,16 @@
     private Button button9;
     private TextBox textBox4;
     private Label label5;
-    private Button button7;
+    private Button btnSelectDirectoryOutput;
     private RichTextBox richTextBox1;
     private TextBox textBox5;
-    private Button button10;
+    private Button btnSelectFileHashCooked;
     private Label label6;
     private Label label7;
-    private Button button11;
+    private Button btnGenerateHashTFC;
     private Button button3;
     private DataGridView ddGrid;
+    private Label label2;
+    private Button button5;
   }
 }

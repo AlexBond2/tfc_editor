@@ -48,7 +48,7 @@ namespace PaladinsTfc
         if (c % 1000 == 0) Console.WriteLine($"hashed {c}/{imgPaths.Length} ..{relPath}..");
         c++;
       });
-      Console.WriteLine($"successfully hashed all files");
+      Console.WriteLine($"successfully hashed all files to {outFile}");
 
       string jsData = JsonConvert.SerializeObject(hashItems.ToArray(), Formatting.Indented);
       System.IO.Directory.CreateDirectory(Path.GetDirectoryName(outFile));

@@ -396,7 +396,7 @@ namespace PaladinsTfc
       fsImg.Close();
 
       if (nWrittenBytes > tex.totalTextureBytes) {
-        throw new Exception("replacement texture can not be sufficently compressed. Reducing noise in the texture should fix this, (Output is corrupted)"); 
+        throw new Exception("Replacement texture can not be sufficently compressed. Try reducing the noise in the replacement texture"); 
       }
       fs.Seek(tex.loc_totalTextureBytes, SeekOrigin.Begin); 
       fs.Write(BitConverter.GetBytes(nWrittenBytes), 0, 4);
