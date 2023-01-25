@@ -10,6 +10,11 @@ using System.Windows.Forms;
 using PaladinsTfcExtend;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Microsoft.WindowsAPICodePack.Shell;
+using Pfim;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using Img = SixLabors.ImageSharp;
+using System.Numerics;
 
 namespace paladins_tfc.src.gui {
   public partial class SelectorWizard : Form {
@@ -17,11 +22,40 @@ namespace paladins_tfc.src.gui {
     string TFCdir;
     public SelectorWizard(string TFCdir) {
       this.TFCdir = TFCdir;
+
       InitializeComponent();
+
       openFileDialogSelectDirectoryCookedReference = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryCookedReference.IsFolderPicker = true;
-    }
+      openFileDialogSelectDirectoryCookedReference.RestoreDirectory = true;
 
+      imgListTFC.ImageSize = new Size(128, 128);
+      imgListTFC.ColorDepth = ColorDepth.Depth16Bit;
+      listViewTFC.LargeImageList = imgListTFC;
+
+      /* IMAGE TEST CODE */
+      string path = @"F:\dev\paladins\TFC_Dump_2023-01-24\CharTexturesHighRes3_068_2048xDXT1.dds";
+      string filename = Path.GetFileName(path);
+      var tempPng = "./assets/"+Path.ChangeExtension(filename, ".png");
+      using (var image = Pfimage.FromFile(path)) {
+        var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned);
+        Image bitmap;
+        try {
+          var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+          bitmap = new Bitmap(image.Width, image.Height, image.Stride, PixelFormat.Format32bppArgb, data);
+          //bitmap.Save(tempPng, System.Drawing.Imaging.ImageFormat.Png);
+        } finally {
+          handle.Free();
+        }
+        imgListTFC.Images.Add(filename, bitmap);
+        listViewTFC.Items.Add(new ListViewItem {
+          ImageIndex = 0,
+          Text = filename,
+          Tag = filename
+        });
+      }
+      //64 128 256 512 1024 2048
+    }
     public bool makeRedIfFailPath(string s, TextBox tb) {
       string failString = null;
       if (string.IsNullOrEmpty(s)) {
@@ -177,11 +211,43 @@ namespace paladins_tfc.src.gui {
     }
 
     private void btnGenerateHashCooked_Click(object sender, EventArgs e) {
-
+      MessageBox.Show("TODO: generate cooked hashes");
     }
 
     private void btnGenerateHashTFC_Click(object sender, EventArgs e) {
+      MessageBox.Show("TODO: generate TFC hashes");
+    }
 
+    private void sliderFilterResolution_Scroll(object sender, EventArgs e) {
+      int resolution = (1 << 6) << sliderFilterResolution.Value;
+      numericFilterResolution.Value = resolution; 
+    }
+
+    private void checkCookedImage_CheckedChanged(object sender, EventArgs e) {
+      groupCookedImage.Enabled = checkCookedImage.Checked;
+    }
+
+    private void checkResolution_CheckedChanged(object sender, EventArgs e) {
+      groupResolution.Enabled = checkResolution.Checked;
+    }
+
+    private void numericFilterResolution_ValueChanged(object sender, EventArgs e) {
+      int nLeading0s = BitOperations.LeadingZeroCount((uint)(numericFilterResolution.Value));
+      int howMuch64isShifter = 32 - 6 - nLeading0s - 1;
+      sliderFilterResolution.Value = howMuch64isShifter;
+      numericFilterResolution.Value = (1 << 6) << howMuch64isShifter;
+    }
+
+    private void checkFileName_CheckedChanged(object sender, EventArgs e) {
+      groupFileName.Enabled = checkFileName.Checked;
+    }
+
+    private void btnCookedFilterBrowse_Click(object sender, EventArgs e) {
+      openFileDialogCookedFilter.InitialDirectory = textSelectDirectoryCookedReference.Text;
+      if (openFileDialogCookedFilter.ShowDialog() == DialogResult.OK) {
+        textCookedFilter.Text = openFileDialogCookedFilter.FileName;
+        textCookedFilter.cursorToRight();
+      }
     }
   }
 }

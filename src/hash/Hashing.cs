@@ -61,18 +61,18 @@ namespace PaladinsTfc
       if (imgType == ImgType.PNG){
         return Img.Image.Load<Img.PixelFormats.Rgba32>(path);
       } else if (imgType == ImgType.DDS) {
-        var pngPath = Path.ChangeExtension(path, ".png"); 
+        var tempPng = Path.ChangeExtension(path, ".png"); 
         using (var image = Pfimage.FromFile(path)) {
           var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned); 
           try {
             var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
             var bitmap = new Bitmap(image.Width, image.Height, image.Stride, PixelFormat.Format32bppArgb, data);
-            bitmap.Save(pngPath, System.Drawing.Imaging.ImageFormat.Png);
+            bitmap.Save(tempPng, System.Drawing.Imaging.ImageFormat.Png);
           } finally {
             handle.Free();
           }
-          var img = Img.Image.Load<Img.PixelFormats.Rgba32>(pngPath);
-          File.Delete(pngPath);
+          var img = Img.Image.Load<Img.PixelFormats.Rgba32>(tempPng);
+          File.Delete(tempPng);
           return img;
         }
       }

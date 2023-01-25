@@ -73,7 +73,7 @@ namespace PaladinsTfc
       // 
       // btnOperationAdd
       // 
-      this.btnOperationAdd.Location = new System.Drawing.Point(11, 233);
+      this.btnOperationAdd.Location = new System.Drawing.Point(11, 88);
       this.btnOperationAdd.Name = "btnOperationAdd";
       this.btnOperationAdd.Size = new System.Drawing.Size(184, 23);
       this.btnOperationAdd.TabIndex = 11;
@@ -92,7 +92,7 @@ namespace PaladinsTfc
       // 
       // btnOperationSave
       // 
-      this.btnOperationSave.Location = new System.Drawing.Point(11, 329);
+      this.btnOperationSave.Location = new System.Drawing.Point(11, 195);
       this.btnOperationSave.Name = "btnOperationSave";
       this.btnOperationSave.Size = new System.Drawing.Size(184, 23);
       this.btnOperationSave.TabIndex = 14;
@@ -103,7 +103,7 @@ namespace PaladinsTfc
       // 
       this.labelOperations.AutoSize = true;
       this.labelOperations.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-      this.labelOperations.Location = new System.Drawing.Point(12, 215);
+      this.labelOperations.Location = new System.Drawing.Point(12, 70);
       this.labelOperations.Name = "labelOperations";
       this.labelOperations.Size = new System.Drawing.Size(65, 15);
       this.labelOperations.TabIndex = 15;
@@ -112,7 +112,7 @@ namespace PaladinsTfc
       // 
       // btnOperationLoad
       // 
-      this.btnOperationLoad.Location = new System.Drawing.Point(11, 358);
+      this.btnOperationLoad.Location = new System.Drawing.Point(11, 224);
       this.btnOperationLoad.Name = "btnOperationLoad";
       this.btnOperationLoad.Size = new System.Drawing.Size(184, 23);
       this.btnOperationLoad.TabIndex = 16;
@@ -131,11 +131,11 @@ namespace PaladinsTfc
       // labelSelectDirectoryOutput
       // 
       this.labelSelectDirectoryOutput.AutoSize = true;
-      this.labelSelectDirectoryOutput.Location = new System.Drawing.Point(77, 45);
+      this.labelSelectDirectoryOutput.Location = new System.Drawing.Point(100, 45);
       this.labelSelectDirectoryOutput.Name = "labelSelectDirectoryOutput";
-      this.labelSelectDirectoryOutput.Size = new System.Drawing.Size(119, 15);
+      this.labelSelectDirectoryOutput.Size = new System.Drawing.Size(96, 15);
       this.labelSelectDirectoryOutput.TabIndex = 19;
-      this.labelSelectDirectoryOutput.Text = "TFC Output Directory";
+      this.labelSelectDirectoryOutput.Text = "Output Directory";
       this.labelSelectDirectoryOutput.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // btnSelectDirectoryOutput
@@ -152,10 +152,10 @@ namespace PaladinsTfc
       // 
       this.richTextLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-      this.richTextLog.Location = new System.Drawing.Point(12, 438);
+      this.richTextLog.Location = new System.Drawing.Point(12, 364);
       this.richTextLog.Name = "richTextLog";
       this.richTextLog.ReadOnly = true;
-      this.richTextLog.Size = new System.Drawing.Size(183, 216);
+      this.richTextLog.Size = new System.Drawing.Size(183, 290);
       this.richTextLog.TabIndex = 21;
       this.richTextLog.Text = "";
       // 
@@ -181,7 +181,7 @@ namespace PaladinsTfc
       // 
       // btnOperationDuplicate
       // 
-      this.btnOperationDuplicate.Location = new System.Drawing.Point(11, 262);
+      this.btnOperationDuplicate.Location = new System.Drawing.Point(11, 117);
       this.btnOperationDuplicate.Name = "btnOperationDuplicate";
       this.btnOperationDuplicate.Size = new System.Drawing.Size(184, 23);
       this.btnOperationDuplicate.TabIndex = 27;
@@ -194,10 +194,10 @@ namespace PaladinsTfc
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.ddGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-      this.ddGrid.Location = new System.Drawing.Point(202, 215);
+      this.ddGrid.Location = new System.Drawing.Point(202, 70);
       this.ddGrid.Name = "ddGrid";
       this.ddGrid.RowTemplate.Height = 25;
-      this.ddGrid.Size = new System.Drawing.Size(813, 483);
+      this.ddGrid.Size = new System.Drawing.Size(813, 628);
       this.ddGrid.TabIndex = 28;
       this.ddGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ddGrid_CellContentClick);
       // 
@@ -205,7 +205,7 @@ namespace PaladinsTfc
       // 
       this.labelLog.AutoSize = true;
       this.labelLog.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-      this.labelLog.Location = new System.Drawing.Point(12, 420);
+      this.labelLog.Location = new System.Drawing.Point(11, 346);
       this.labelLog.Name = "labelLog";
       this.labelLog.Size = new System.Drawing.Size(27, 15);
       this.labelLog.TabIndex = 29;
@@ -214,7 +214,7 @@ namespace PaladinsTfc
       // 
       // btnOperationDelete
       // 
-      this.btnOperationDelete.Location = new System.Drawing.Point(11, 291);
+      this.btnOperationDelete.Location = new System.Drawing.Point(11, 146);
       this.btnOperationDelete.Name = "btnOperationDelete";
       this.btnOperationDelete.Size = new System.Drawing.Size(184, 23);
       this.btnOperationDelete.TabIndex = 30;
@@ -272,6 +272,5 @@ namespace PaladinsTfc
     private Button btnOperationDelete;
     private CommonOpenFileDialog openFileDialogSelectDirectoryInput;
     private CommonOpenFileDialog openFileDialogSelectDirectoryOutput;
-    private CommonOpenFileDialog openFileDialogSelectDirectoryCookedReference;
   }
 }

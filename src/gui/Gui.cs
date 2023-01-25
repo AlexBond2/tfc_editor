@@ -113,8 +113,10 @@ namespace PaladinsTfc
     private void Gui_Load(object sender, EventArgs e){
       openFileDialogSelectDirectoryInput = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryInput.IsFolderPicker = true;
+      openFileDialogSelectDirectoryInput.RestoreDirectory = true;
       openFileDialogSelectDirectoryOutput = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryOutput.IsFolderPicker = true;
+      openFileDialogSelectDirectoryOutput.RestoreDirectory = true;
     }
 
     private void ddGrid_CellContentClick(object sender, DataGridViewCellEventArgs e) {
