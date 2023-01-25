@@ -1,4 +1,7 @@
-﻿namespace PaladinsTfc
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.WindowsAPICodePack.Shell;
+
+namespace PaladinsTfc
 {
   partial class Gui
   {
@@ -28,240 +31,162 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.textBox1 = new System.Windows.Forms.TextBox();
-      this.btnGenerateHashCooked = new System.Windows.Forms.Button();
-      this.btnSelectFileHashTFC = new System.Windows.Forms.Button();
-      this.label1 = new System.Windows.Forms.Label();
-      this.textBox2 = new System.Windows.Forms.TextBox();
-      this.label3 = new System.Windows.Forms.Label();
+      this.labelSelectDirectoryInput = new System.Windows.Forms.Label();
       this.btnSelectDirectoryInput = new System.Windows.Forms.Button();
-      this.buttonOperationAdd = new System.Windows.Forms.Button();
-      this.button6 = new System.Windows.Forms.Button();
-      this.button8 = new System.Windows.Forms.Button();
-      this.label4 = new System.Windows.Forms.Label();
-      this.button9 = new System.Windows.Forms.Button();
-      this.textBox4 = new System.Windows.Forms.TextBox();
-      this.label5 = new System.Windows.Forms.Label();
+      this.btnOperationAdd = new System.Windows.Forms.Button();
+      this.btnRun = new System.Windows.Forms.Button();
+      this.btnOperationSave = new System.Windows.Forms.Button();
+      this.labelOperations = new System.Windows.Forms.Label();
+      this.btnOperationLoad = new System.Windows.Forms.Button();
+      this.textSelectDirectoryInput = new System.Windows.Forms.TextBox();
+      this.labelSelectDirectoryOutput = new System.Windows.Forms.Label();
       this.btnSelectDirectoryOutput = new System.Windows.Forms.Button();
-      this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-      this.textBox5 = new System.Windows.Forms.TextBox();
-      this.btnSelectFileHashCooked = new System.Windows.Forms.Button();
-      this.label6 = new System.Windows.Forms.Label();
-      this.label7 = new System.Windows.Forms.Label();
-      this.btnGenerateHashTFC = new System.Windows.Forms.Button();
-      this.button3 = new System.Windows.Forms.Button();
+      this.richTextLog = new System.Windows.Forms.RichTextBox();
+      this.textSelectDirectoryOutput = new System.Windows.Forms.TextBox();
+      this.labelRun = new System.Windows.Forms.Label();
+      this.btnOperationDuplicate = new System.Windows.Forms.Button();
       this.ddGrid = new System.Windows.Forms.DataGridView();
-      this.label2 = new System.Windows.Forms.Label();
-      this.button5 = new System.Windows.Forms.Button();
+      this.labelLog = new System.Windows.Forms.Label();
+      this.btnOperationDelete = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.ddGrid)).BeginInit();
       this.SuspendLayout();
       // 
-      // textBox1
+      // labelSelectDirectoryInput
       // 
-      this.textBox1.Location = new System.Drawing.Point(202, 12);
-      this.textBox1.Name = "textBox1";
-      this.textBox1.ReadOnly = true;
-      this.textBox1.Size = new System.Drawing.Size(226, 23);
-      this.textBox1.TabIndex = 0;
-      // 
-      // btnGenerateHashCooked
-      // 
-      this.btnGenerateHashCooked.Location = new System.Drawing.Point(533, 12);
-      this.btnGenerateHashCooked.Name = "btnGenerateHashCooked";
-      this.btnGenerateHashCooked.Size = new System.Drawing.Size(170, 23);
-      this.btnGenerateHashCooked.TabIndex = 1;
-      this.btnGenerateHashCooked.Text = "Generate Cooked Hashes";
-      this.btnGenerateHashCooked.UseVisualStyleBackColor = true;
-      this.btnGenerateHashCooked.Click += new System.EventHandler(this.btnGenerateHashCooked_Click);
-      // 
-      // btnSelectFileHashTFC
-      // 
-      this.btnSelectFileHashTFC.Location = new System.Drawing.Point(434, 41);
-      this.btnSelectFileHashTFC.Name = "btnSelectFileHashTFC";
-      this.btnSelectFileHashTFC.Size = new System.Drawing.Size(93, 23);
-      this.btnSelectFileHashTFC.TabIndex = 2;
-      this.btnSelectFileHashTFC.Text = "Select File";
-      this.btnSelectFileHashTFC.UseVisualStyleBackColor = true;
-      // 
-      // label1
-      // 
-      this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(106, 16);
-      this.label1.Name = "label1";
-      this.label1.Size = new System.Drawing.Size(89, 15);
-      this.label1.TabIndex = 3;
-      this.label1.Text = "Cooked Hashes";
-      this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-      // 
-      // textBox2
-      // 
-      this.textBox2.Location = new System.Drawing.Point(202, 41);
-      this.textBox2.Name = "textBox2";
-      this.textBox2.ReadOnly = true;
-      this.textBox2.Size = new System.Drawing.Size(226, 23);
-      this.textBox2.TabIndex = 4;
-      // 
-      // label3
-      // 
-      this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(110, 73);
-      this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(86, 15);
-      this.label3.TabIndex = 7;
-      this.label3.Text = "Input Directory";
-      this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.labelSelectDirectoryInput.AutoSize = true;
+      this.labelSelectDirectoryInput.Location = new System.Drawing.Point(87, 16);
+      this.labelSelectDirectoryInput.Name = "labelSelectDirectoryInput";
+      this.labelSelectDirectoryInput.Size = new System.Drawing.Size(109, 15);
+      this.labelSelectDirectoryInput.TabIndex = 7;
+      this.labelSelectDirectoryInput.Text = "TFC Input Directory";
+      this.labelSelectDirectoryInput.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // btnSelectDirectoryInput
       // 
-      this.btnSelectDirectoryInput.Location = new System.Drawing.Point(434, 70);
+      this.btnSelectDirectoryInput.Location = new System.Drawing.Point(434, 11);
       this.btnSelectDirectoryInput.Name = "btnSelectDirectoryInput";
       this.btnSelectDirectoryInput.Size = new System.Drawing.Size(93, 23);
       this.btnSelectDirectoryInput.TabIndex = 9;
       this.btnSelectDirectoryInput.Text = "Select Folder";
       this.btnSelectDirectoryInput.UseVisualStyleBackColor = true;
+      this.btnSelectDirectoryInput.Click += new System.EventHandler(this.btnSelectDirectoryInput_Click);
       // 
-      // buttonOperationAdd
+      // btnOperationAdd
       // 
-      this.buttonOperationAdd.Location = new System.Drawing.Point(12, 159);
-      this.buttonOperationAdd.Name = "buttonOperationAdd";
-      this.buttonOperationAdd.Size = new System.Drawing.Size(184, 23);
-      this.buttonOperationAdd.TabIndex = 11;
-      this.buttonOperationAdd.Text = "Add Operation";
-      this.buttonOperationAdd.UseVisualStyleBackColor = true;
+      this.btnOperationAdd.Location = new System.Drawing.Point(11, 233);
+      this.btnOperationAdd.Name = "btnOperationAdd";
+      this.btnOperationAdd.Size = new System.Drawing.Size(184, 23);
+      this.btnOperationAdd.TabIndex = 11;
+      this.btnOperationAdd.Text = "Add Operation";
+      this.btnOperationAdd.UseVisualStyleBackColor = true;
       // 
-      // button6
+      // btnRun
       // 
-      this.button6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.button6.Location = new System.Drawing.Point(12, 675);
-      this.button6.Name = "button6";
-      this.button6.Size = new System.Drawing.Size(184, 23);
-      this.button6.TabIndex = 12;
-      this.button6.Text = "Run";
-      this.button6.UseVisualStyleBackColor = true;
+      this.btnRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.btnRun.Location = new System.Drawing.Point(12, 675);
+      this.btnRun.Name = "btnRun";
+      this.btnRun.Size = new System.Drawing.Size(184, 23);
+      this.btnRun.TabIndex = 12;
+      this.btnRun.Text = "Run Operations";
+      this.btnRun.UseVisualStyleBackColor = true;
       // 
-      // button8
+      // btnOperationSave
       // 
-      this.button8.Location = new System.Drawing.Point(12, 262);
-      this.button8.Name = "button8";
-      this.button8.Size = new System.Drawing.Size(184, 23);
-      this.button8.TabIndex = 14;
-      this.button8.Text = "Save Operations";
-      this.button8.UseVisualStyleBackColor = true;
+      this.btnOperationSave.Location = new System.Drawing.Point(11, 329);
+      this.btnOperationSave.Name = "btnOperationSave";
+      this.btnOperationSave.Size = new System.Drawing.Size(184, 23);
+      this.btnOperationSave.TabIndex = 14;
+      this.btnOperationSave.Text = "Save Operations";
+      this.btnOperationSave.UseVisualStyleBackColor = true;
       // 
-      // label4
+      // labelOperations
       // 
-      this.label4.AutoSize = true;
-      this.label4.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-      this.label4.Location = new System.Drawing.Point(12, 141);
-      this.label4.Name = "label4";
-      this.label4.Size = new System.Drawing.Size(65, 15);
-      this.label4.TabIndex = 15;
-      this.label4.Text = "Operations";
-      this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.labelOperations.AutoSize = true;
+      this.labelOperations.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+      this.labelOperations.Location = new System.Drawing.Point(12, 215);
+      this.labelOperations.Name = "labelOperations";
+      this.labelOperations.Size = new System.Drawing.Size(65, 15);
+      this.labelOperations.TabIndex = 15;
+      this.labelOperations.Text = "Operations";
+      this.labelOperations.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
-      // button9
+      // btnOperationLoad
       // 
-      this.button9.Location = new System.Drawing.Point(12, 291);
-      this.button9.Name = "button9";
-      this.button9.Size = new System.Drawing.Size(184, 23);
-      this.button9.TabIndex = 16;
-      this.button9.Text = "Load Operations";
-      this.button9.UseVisualStyleBackColor = true;
+      this.btnOperationLoad.Location = new System.Drawing.Point(11, 358);
+      this.btnOperationLoad.Name = "btnOperationLoad";
+      this.btnOperationLoad.Size = new System.Drawing.Size(184, 23);
+      this.btnOperationLoad.TabIndex = 16;
+      this.btnOperationLoad.Text = "Load Operations";
+      this.btnOperationLoad.UseVisualStyleBackColor = true;
       // 
-      // textBox4
+      // textSelectDirectoryInput
       // 
-      this.textBox4.Location = new System.Drawing.Point(202, 70);
-      this.textBox4.Name = "textBox4";
-      this.textBox4.ReadOnly = true;
-      this.textBox4.Size = new System.Drawing.Size(226, 23);
-      this.textBox4.TabIndex = 18;
+      this.textSelectDirectoryInput.Location = new System.Drawing.Point(202, 12);
+      this.textSelectDirectoryInput.Name = "textSelectDirectoryInput";
+      this.textSelectDirectoryInput.ReadOnly = true;
+      this.textSelectDirectoryInput.Size = new System.Drawing.Size(226, 23);
+      this.textSelectDirectoryInput.TabIndex = 18;
+      this.textSelectDirectoryInput.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
-      // label5
+      // labelSelectDirectoryOutput
       // 
-      this.label5.AutoSize = true;
-      this.label5.Location = new System.Drawing.Point(100, 102);
-      this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(96, 15);
-      this.label5.TabIndex = 19;
-      this.label5.Text = "Output Directory";
-      this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.labelSelectDirectoryOutput.AutoSize = true;
+      this.labelSelectDirectoryOutput.Location = new System.Drawing.Point(77, 45);
+      this.labelSelectDirectoryOutput.Name = "labelSelectDirectoryOutput";
+      this.labelSelectDirectoryOutput.Size = new System.Drawing.Size(119, 15);
+      this.labelSelectDirectoryOutput.TabIndex = 19;
+      this.labelSelectDirectoryOutput.Text = "TFC Output Directory";
+      this.labelSelectDirectoryOutput.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // btnSelectDirectoryOutput
       // 
-      this.btnSelectDirectoryOutput.Location = new System.Drawing.Point(434, 99);
+      this.btnSelectDirectoryOutput.Location = new System.Drawing.Point(434, 41);
       this.btnSelectDirectoryOutput.Name = "btnSelectDirectoryOutput";
       this.btnSelectDirectoryOutput.Size = new System.Drawing.Size(93, 23);
       this.btnSelectDirectoryOutput.TabIndex = 20;
       this.btnSelectDirectoryOutput.Text = "Select Folder";
       this.btnSelectDirectoryOutput.UseVisualStyleBackColor = true;
+      this.btnSelectDirectoryOutput.Click += new System.EventHandler(this.btnSelectDirectoryOutput_Click);
       // 
-      // richTextBox1
+      // richTextLog
       // 
-      this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.richTextLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-      this.richTextBox1.Location = new System.Drawing.Point(12, 364);
-      this.richTextBox1.Name = "richTextBox1";
-      this.richTextBox1.ReadOnly = true;
-      this.richTextBox1.Size = new System.Drawing.Size(184, 290);
-      this.richTextBox1.TabIndex = 21;
-      this.richTextBox1.Text = "";
+      this.richTextLog.Location = new System.Drawing.Point(12, 438);
+      this.richTextLog.Name = "richTextLog";
+      this.richTextLog.ReadOnly = true;
+      this.richTextLog.Size = new System.Drawing.Size(183, 216);
+      this.richTextLog.TabIndex = 21;
+      this.richTextLog.Text = "";
       // 
-      // textBox5
+      // textSelectDirectoryOutput
       // 
-      this.textBox5.Location = new System.Drawing.Point(202, 99);
-      this.textBox5.Name = "textBox5";
-      this.textBox5.ReadOnly = true;
-      this.textBox5.Size = new System.Drawing.Size(226, 23);
-      this.textBox5.TabIndex = 22;
+      this.textSelectDirectoryOutput.Location = new System.Drawing.Point(202, 41);
+      this.textSelectDirectoryOutput.Name = "textSelectDirectoryOutput";
+      this.textSelectDirectoryOutput.ReadOnly = true;
+      this.textSelectDirectoryOutput.Size = new System.Drawing.Size(226, 23);
+      this.textSelectDirectoryOutput.TabIndex = 22;
+      this.textSelectDirectoryOutput.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
-      // btnSelectFileHashCooked
+      // labelRun
       // 
-      this.btnSelectFileHashCooked.Location = new System.Drawing.Point(434, 12);
-      this.btnSelectFileHashCooked.Name = "btnSelectFileHashCooked";
-      this.btnSelectFileHashCooked.Size = new System.Drawing.Size(93, 23);
-      this.btnSelectFileHashCooked.TabIndex = 23;
-      this.btnSelectFileHashCooked.Text = "Select File";
-      this.btnSelectFileHashCooked.UseVisualStyleBackColor = true;
+      this.labelRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+      this.labelRun.AutoSize = true;
+      this.labelRun.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+      this.labelRun.Location = new System.Drawing.Point(12, 657);
+      this.labelRun.Name = "labelRun";
+      this.labelRun.Size = new System.Drawing.Size(84, 15);
+      this.labelRun.TabIndex = 24;
+      this.labelRun.Text = "Sheduled : X/X";
       // 
-      // label6
+      // btnOperationDuplicate
       // 
-      this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.label6.AutoSize = true;
-      this.label6.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-      this.label6.Location = new System.Drawing.Point(12, 657);
-      this.label6.Name = "label6";
-      this.label6.Size = new System.Drawing.Size(84, 15);
-      this.label6.TabIndex = 24;
-      this.label6.Text = "Sheduled : X/X";
-      // 
-      // label7
-      // 
-      this.label7.AutoSize = true;
-      this.label7.Location = new System.Drawing.Point(128, 45);
-      this.label7.Name = "label7";
-      this.label7.Size = new System.Drawing.Size(68, 15);
-      this.label7.TabIndex = 25;
-      this.label7.Text = "TFC Hashes";
-      this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-      // 
-      // btnGenerateHashTFC
-      // 
-      this.btnGenerateHashTFC.Location = new System.Drawing.Point(533, 41);
-      this.btnGenerateHashTFC.Name = "btnGenerateHashTFC";
-      this.btnGenerateHashTFC.Size = new System.Drawing.Size(170, 23);
-      this.btnGenerateHashTFC.TabIndex = 26;
-      this.btnGenerateHashTFC.Text = "Generate TFC Hashes";
-      this.btnGenerateHashTFC.UseVisualStyleBackColor = true;
-      this.btnGenerateHashTFC.Click += new System.EventHandler(this.btnGenerateHashTFC_Click);
-      // 
-      // button3
-      // 
-      this.button3.Location = new System.Drawing.Point(12, 188);
-      this.button3.Name = "button3";
-      this.button3.Size = new System.Drawing.Size(184, 23);
-      this.button3.TabIndex = 27;
-      this.button3.Text = "Duplicate Operation";
-      this.button3.UseVisualStyleBackColor = true;
+      this.btnOperationDuplicate.Location = new System.Drawing.Point(11, 262);
+      this.btnOperationDuplicate.Name = "btnOperationDuplicate";
+      this.btnOperationDuplicate.Size = new System.Drawing.Size(184, 23);
+      this.btnOperationDuplicate.TabIndex = 27;
+      this.btnOperationDuplicate.Text = "Duplicate Operation";
+      this.btnOperationDuplicate.UseVisualStyleBackColor = true;
       // 
       // ddGrid
       // 
@@ -269,63 +194,55 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.ddGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-      this.ddGrid.Location = new System.Drawing.Point(202, 141);
+      this.ddGrid.Location = new System.Drawing.Point(202, 215);
       this.ddGrid.Name = "ddGrid";
       this.ddGrid.RowTemplate.Height = 25;
-      this.ddGrid.Size = new System.Drawing.Size(813, 557);
+      this.ddGrid.Size = new System.Drawing.Size(813, 483);
       this.ddGrid.TabIndex = 28;
       this.ddGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ddGrid_CellContentClick);
       // 
-      // label2
+      // labelLog
       // 
-      this.label2.AutoSize = true;
-      this.label2.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-      this.label2.Location = new System.Drawing.Point(12, 346);
-      this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(27, 15);
-      this.label2.TabIndex = 29;
-      this.label2.Text = "Log";
-      this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.labelLog.AutoSize = true;
+      this.labelLog.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
+      this.labelLog.Location = new System.Drawing.Point(12, 420);
+      this.labelLog.Name = "labelLog";
+      this.labelLog.Size = new System.Drawing.Size(27, 15);
+      this.labelLog.TabIndex = 29;
+      this.labelLog.Text = "Log";
+      this.labelLog.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
-      // button5
+      // btnOperationDelete
       // 
-      this.button5.Location = new System.Drawing.Point(12, 217);
-      this.button5.Name = "button5";
-      this.button5.Size = new System.Drawing.Size(184, 23);
-      this.button5.TabIndex = 30;
-      this.button5.Text = "Delete Operation";
-      this.button5.UseVisualStyleBackColor = true;
+      this.btnOperationDelete.Location = new System.Drawing.Point(11, 291);
+      this.btnOperationDelete.Name = "btnOperationDelete";
+      this.btnOperationDelete.Size = new System.Drawing.Size(184, 23);
+      this.btnOperationDelete.TabIndex = 30;
+      this.btnOperationDelete.Text = "Delete Operation";
+      this.btnOperationDelete.UseVisualStyleBackColor = true;
       // 
       // Gui
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(1027, 710);
-      this.Controls.Add(this.button5);
-      this.Controls.Add(this.label2);
-      this.Controls.Add(this.button6);
-      this.Controls.Add(this.buttonOperationAdd);
-      this.Controls.Add(this.ddGrid);
-      this.Controls.Add(this.button3);
-      this.Controls.Add(this.btnGenerateHashTFC);
-      this.Controls.Add(this.label7);
-      this.Controls.Add(this.btnSelectFileHashCooked);
-      this.Controls.Add(this.textBox5);
-      this.Controls.Add(this.richTextBox1);
-      this.Controls.Add(this.btnSelectDirectoryOutput);
-      this.Controls.Add(this.label5);
-      this.Controls.Add(this.textBox4);
-      this.Controls.Add(this.button9);
-      this.Controls.Add(this.button8);
+      this.Controls.Add(this.btnOperationAdd);
+      this.Controls.Add(this.labelSelectDirectoryInput);
+      this.Controls.Add(this.textSelectDirectoryInput);
       this.Controls.Add(this.btnSelectDirectoryInput);
-      this.Controls.Add(this.label3);
-      this.Controls.Add(this.textBox2);
-      this.Controls.Add(this.label1);
-      this.Controls.Add(this.btnSelectFileHashTFC);
-      this.Controls.Add(this.btnGenerateHashCooked);
-      this.Controls.Add(this.textBox1);
-      this.Controls.Add(this.label4);
-      this.Controls.Add(this.label6);
+      this.Controls.Add(this.labelSelectDirectoryOutput);
+      this.Controls.Add(this.textSelectDirectoryOutput);
+      this.Controls.Add(this.btnSelectDirectoryOutput);
+      this.Controls.Add(this.labelOperations);
+      this.Controls.Add(this.btnOperationDuplicate);
+      this.Controls.Add(this.btnOperationDelete);
+      this.Controls.Add(this.btnOperationSave);
+      this.Controls.Add(this.btnOperationLoad);
+      this.Controls.Add(this.ddGrid);
+      this.Controls.Add(this.labelLog);
+      this.Controls.Add(this.richTextLog);
+      this.Controls.Add(this.labelRun);
+      this.Controls.Add(this.btnRun);
       this.Name = "Gui";
       this.Text = "TFC editor";
       this.Load += new System.EventHandler(this.Gui_Load);
@@ -336,31 +253,25 @@
     }
 
     #endregion
-
-    private TextBox textBox1;
-    private Button btnGenerateHashCooked;
-    private Button btnSelectFileHashTFC;
-    private Label label1;
-    private TextBox textBox2;
-    private Label label3;
+    private Label labelSelectDirectoryInput;
     private Button btnSelectDirectoryInput;
-    private Button buttonOperationAdd;
-    private Button button6;
-    private Button button8;
-    private Label label4;
-    private Button button9;
-    private TextBox textBox4;
-    private Label label5;
+    private Button btnOperationAdd;
+    private Button btnRun;
+    private Button btnOperationSave;
+    private Label labelOperations;
+    private Button btnOperationLoad;
+    private TextBox textSelectDirectoryInput;
+    private Label labelSelectDirectoryOutput;
     private Button btnSelectDirectoryOutput;
-    private RichTextBox richTextBox1;
-    private TextBox textBox5;
-    private Button btnSelectFileHashCooked;
-    private Label label6;
-    private Label label7;
-    private Button btnGenerateHashTFC;
-    private Button button3;
+    private RichTextBox richTextLog;
+    private TextBox textSelectDirectoryOutput;
+    private Label labelRun;
+    private Button btnOperationDuplicate;
     private DataGridView ddGrid;
-    private Label label2;
-    private Button button5;
+    private Label labelLog;
+    private Button btnOperationDelete;
+    private CommonOpenFileDialog openFileDialogSelectDirectoryInput;
+    private CommonOpenFileDialog openFileDialogSelectDirectoryOutput;
+    private CommonOpenFileDialog openFileDialogSelectDirectoryCookedReference;
   }
 }

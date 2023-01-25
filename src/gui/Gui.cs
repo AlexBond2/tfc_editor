@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using Microsoft.WindowsAPICodePack.Shell;
+using PaladinsTfcExtend;
 
 namespace PaladinsTfc
 {  
@@ -57,8 +60,8 @@ namespace PaladinsTfc
 
       DataGridViewButtonColumn ddcolSelectorGenerate = new DataGridViewButtonColumn();
       ddcolSelectorGenerate.HeaderText = "";
-      ddcolSelectorGenerate.Text = "…";
-      ddcolSelectorGenerate.ToolTipText = "Generate Selector from Source Image";
+      ddcolSelectorGenerate.Text = "🧙";
+      ddcolSelectorGenerate.ToolTipText = "Selector Wizard";
       ddcolSelectorGenerate.UseColumnTextForButtonValue = true;
       ddcolSelectorGenerate.Width = 20;
       ddcolSelectorGenerate.Resizable = DataGridViewTriState.False;
@@ -77,8 +80,8 @@ namespace PaladinsTfc
 
       DataGridViewButtonColumn ddcolReplacementGenerate = new DataGridViewButtonColumn();
       ddcolReplacementGenerate.HeaderText = "";
-      ddcolReplacementGenerate.Text = "…";
-      ddcolReplacementGenerate.ToolTipText = "Pick Replacement Image";
+      ddcolReplacementGenerate.Text = "🧙‍";
+      ddcolReplacementGenerate.ToolTipText = "Replacement File Wizard";
       ddcolReplacementGenerate.UseColumnTextForButtonValue = true;
       ddcolReplacementGenerate.Width = 20;
       ddcolReplacementGenerate.Resizable = DataGridViewTriState.False;
@@ -108,11 +111,21 @@ namespace PaladinsTfc
     }
 
     private void Gui_Load(object sender, EventArgs e){
+      openFileDialogSelectDirectoryInput = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
+      openFileDialogSelectDirectoryInput.IsFolderPicker = true;
+      openFileDialogSelectDirectoryOutput = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
+      openFileDialogSelectDirectoryOutput.IsFolderPicker = true;
     }
 
     private void ddGrid_CellContentClick(object sender, DataGridViewCellEventArgs e) {
       if (e.ColumnIndex == colOfSelectorGenerator) {
-        MessageBox.Show("TODO", "Generate Selector");
+        string TFCInputpath = textSelectDirectoryInput.Text;
+        if (string.IsNullOrEmpty(TFCInputpath)) {
+          MessageBox.Show("You must set the TFC Input Directory to use the selector Wizard", "Error");
+        } else {
+          var selectorWizard = new paladins_tfc.src.gui.SelectorWizard(TFCInputpath);
+          selectorWizard.Show(this);
+        }
       } else if (e.ColumnIndex == colOfReplacementGenerator) {
         MessageBox.Show("TODO","Pick File");
       }
@@ -121,12 +134,18 @@ namespace PaladinsTfc
         editingControl.DroppedDown = true;*/
     }
 
-    private void btnGenerateHashCooked_Click(object sender, EventArgs e) {
-
+    private void btnSelectDirectoryInput_Click(object sender, EventArgs e) {
+      if (openFileDialogSelectDirectoryInput.ShowDialog() == CommonFileDialogResult.Ok) {
+        textSelectDirectoryInput.Text = openFileDialogSelectDirectoryInput.FileName;
+        textSelectDirectoryInput.cursorToRight();
+      }
     }
 
-    private void btnGenerateHashTFC_Click(object sender, EventArgs e) {
-
+    private void btnSelectDirectoryOutput_Click(object sender, EventArgs e) {
+      if (openFileDialogSelectDirectoryOutput.ShowDialog() == CommonFileDialogResult.Ok) {
+        textSelectDirectoryOutput.Text = openFileDialogSelectDirectoryOutput.FileName;
+        textSelectDirectoryOutput.cursorToRight();
+      }
     }
   }
 
