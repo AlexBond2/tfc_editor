@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Data;
+using Newtonsoft.Json;
 
 namespace PaladinsTfcExtend
 {
@@ -19,6 +20,29 @@ namespace PaladinsTfcExtend
         Console.WriteLine("  {0}={1}", name, value);
       }
       Console.WriteLine("}");
+    }
+  }
+  public class PersitantData {
+    private const string configurationPath = "configuration.json";
+    public string inputDirectory { get; set; }
+    public string outputDirectory { get; set; }
+    public string hashesTFC { get; set; }
+    public string hashesCooked { get; set; }
+    public string cookedReferenceDirectory { get; set; }
+    private PersitantData() {
+    }
+    public static PersitantData load() {
+      string fileContent;
+      try {
+        fileContent = File.ReadAllText(configurationPath);
+      } catch (Exception e) {
+        return new PersitantData();        
+      }
+      return JsonConvert.DeserializeObject<PersitantData>(fileContent);
+    }
+    public void write() {
+      string jsData = JsonConvert.SerializeObject(this, Formatting.Indented);
+      File.WriteAllText(configurationPath, jsData);
     }
   }
 }

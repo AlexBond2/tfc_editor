@@ -31,19 +31,19 @@ namespace PaladinsTfc
     }
 
     private static Command getHashCommand(){
-      Command hashCommand = new Command ("hash", "command for hashing images");
+      Command hashCommand = new Command ("hash", "Command for hashing directories of images");
 
       Argument folderArg = new Argument<string>(
         name: "in directory",
-        description: "files to work with"
-      ); 
+        description: "path/to/directory containing files that should be hashed"
+      );
 
-      Command hashUmodelCommand = new Command ("umodel", "hash umodel exported images"){folderArg};
+      Command hashUmodelCommand = new Command ("cooked", "generate hash file for umodel exported (png) images"){folderArg};
       hashUmodelCommand.SetHandler((string inFolder) => {
         Hashing.hashDir(inFolder, Hashing.ImgType.PNG);
       }, folderArg);
 
-      Command hashExportedCommand = new Command ("exported", "hash exported dds images"){folderArg};
+      Command hashExportedCommand = new Command ("tfc", "generate hash file for dumped dds images") {folderArg};
       hashExportedCommand.SetHandler((string inFolder) => {
         Hashing.hashDir(inFolder, Hashing.ImgType.DDS);
       }, folderArg);
@@ -57,41 +57,47 @@ namespace PaladinsTfc
     private static Command getOpenCommand() {      
       Argument openArgument = new Argument<string>(
         name: "in file",
-        description: "TFC file to work with"
+        description: "TFC file to work with <path/to/file.tfc>"
       ); //rootArgument.Arity = ArgumentArity.ExactlyOne;
 
-      Option dumpOption = new Option<String>(
+      Option dumpOption = new Option<string>(
         aliases: new string[] { "--dump", "-d" },
-        description: "dumps the selected ids to dds files\nComma-separated number(range)s | * | ./filepath.txt"
+        description: "Dumps the selected ids to dds files\n [(<id> | <id>-<id> | * )] | ./<args.txt>"
       ); dumpOption.Arity = ArgumentArity.ExactlyOne;
 
-      Option dumpHashOption = new Option<bool>(
-        aliases: new string[] { "--no-image", "-x" },
-        description: "Flag: do not write textures to disk, only the hash json"
-      ); dumpOption.Arity = ArgumentArity.ExactlyOne;
-
-      Option replaceOption = new Option<String>(
+      Option replaceOption = new Option<string>(
         aliases: new string[] { "--replace", "-r" },
-        description: "Comma-separated \"id:replacement.dds\" | ./filepath.txt"
+        description: "Creates a copy of the tfc file but with textures replaced depending on id\n [(<id>:<path/to/replacement.dds>\")] | ./<args.txt>"
       ); replaceOption.Arity = ArgumentArity.ExactlyOne;
 
-      Command openCommand = new Command("open", "for tfc file operations") {
-        openArgument, dumpOption, replaceOption
-      }; openCommand.Description = "TODO write description";
+      Option directoryOption = new Option<string>(
+        aliases: new string[] { "--output-directory", "-o" },
+        description: "Directory to place dumps and/or tfc files.\n <path/to/folder>"
+      ); directoryOption.Arity = ArgumentArity.ExactlyOne;
+      directoryOption.SetDefaultValue("./out");
+
+      Command openCommand = new Command("open", "Parses tfc file and then does [options]") {
+        openArgument, dumpOption, replaceOption, directoryOption
+      }; 
       
       var rootCommand = new RootCommand();
 
-      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, bool onlyDumpHash) => {
+      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, string directoryStr) => {
         Console.WriteLine($"The value for inFile is: {inTfcFile}");
         Console.WriteLine($"The value for --dump is: {dumpRangeStr}");
         Console.WriteLine($"The value for --replace is: {replaceStr}");
-        Console.WriteLine($"The value for --only-dump-hash is: {onlyDumpHash}");
-        
-        if (inTfcFile == null | (dumpRangeStr == null & replaceStr == null)) throw new ArgumentException("No operation supplied");
+        Console.WriteLine($"The value for --output-directory is: {directoryStr}");
+
+        if (inTfcFile == null) {
+          throw new ArgumentException("No file supplied");
+        }
+        if (dumpRangeStr == null & replaceStr == null) {
+          throw new ArgumentException("Neither dump or replace operation supplied");
+        }
         Dictionary<int, string> id2replacement = getReplacements(replaceStr);
         HashSet<int> dumpRange = getDumpRange(dumpRangeStr);
         TexHandling.run(inTfcFile, id2replacement, dumpRange);
-      }, openArgument, dumpOption, replaceOption, dumpHashOption);
+      }, openArgument, dumpOption, replaceOption, directoryOption);
       return openCommand;
     }
 

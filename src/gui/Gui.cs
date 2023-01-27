@@ -11,22 +11,27 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using Microsoft.WindowsAPICodePack.Shell;
 using PaladinsTfcExtend;
 
-namespace PaladinsTfc
-{  
-  public partial class Gui : Form
-  {
+namespace PaladinsTfc {
+  public partial class Gui : Form {
 
     int colOfSelectorGenerator;
     int colOfReplacementGenerator;
 
     BindingList<SettingsRow> operationList;
+    PersitantData persitantData;
 
-    public Gui(){
+    public Gui() {
       InitializeComponent();
 
+      persitantData = PersitantData.load();
+
       operationList = new BindingList<SettingsRow>();
-      operationList.Add(new SettingsRow(SelectOptionSelectorType.FileAndId, "x.tfc#1-5", SelectOptionOperationType.Dump, null));
-      operationList.Add(new SettingsRow(SelectOptionSelectorType.FileAndId, "y.tfc#1-7", SelectOptionOperationType.Dump, null));
+      operationList.Add(new SettingsRow("", SelectOptionOperationType.Dump, null));
+
+      textSelectDirectoryInput.Text = persitantData.inputDirectory;
+      textSelectDirectoryOutput.Text = persitantData.outputDirectory;
+      textSelectDirectoryInput.cursorToRight();
+      textSelectDirectoryOutput.cursorToRight();
 
       /*
       DataGridViewButtonColumn ddcolDelete = new DataGridViewButtonColumn();
@@ -41,22 +46,17 @@ namespace PaladinsTfc
 
       DataGridViewCheckBoxColumn ddcolValid = new DataGridViewCheckBoxColumn();
       ddcolValid.HeaderText = "✔";
-      ddcolValid.DataPropertyName = "Valid";
+      ddcolValid.DataPropertyName = "Enabled";
       ddcolValid.Width = 25;
       ddcolValid.ReadOnly = true;
       ddcolValid.Resizable = DataGridViewTriState.False;
       ddcolValid.DisplayIndex = 0;
 
-      DataGridViewComboBoxColumn ddcolSelectorType = new DataGridViewComboBoxColumn();
-      ddcolSelectorType.HeaderText = "Selector Type";
-      ddcolSelectorType.DataPropertyName = "SelectorType";
-      ddcolSelectorType.DataSource = new List<string>(){SelectOptionSelectorType.FileAndId, SelectOptionSelectorType.FileAndIdRange, SelectOptionSelectorType.File, SelectOptionSelectorType.All};
-      ddcolSelectorType.DisplayIndex = 1;
-
       DataGridViewTextBoxColumn ddcolSelector = new DataGridViewTextBoxColumn();
       ddcolSelector.HeaderText = "Selector";
       ddcolSelector.DataPropertyName = "Selector";
       ddcolSelector.DisplayIndex = 2;
+      ddcolSelector.Width = 250;
 
       DataGridViewButtonColumn ddcolSelectorGenerate = new DataGridViewButtonColumn();
       ddcolSelectorGenerate.HeaderText = "";
@@ -70,13 +70,15 @@ namespace PaladinsTfc
       DataGridViewComboBoxColumn ddcolOperationType = new DataGridViewComboBoxColumn();
       ddcolOperationType.HeaderText = "Operation Type";
       ddcolOperationType.DataPropertyName = "OperationType";
-      ddcolOperationType.DataSource = new List<string>(){SelectOptionOperationType.Dump, SelectOptionOperationType.Replace};
+      ddcolOperationType.DataSource = new List<string>() { SelectOptionOperationType.Dump, SelectOptionOperationType.Replace };
       ddcolOperationType.DisplayIndex = 4;
+      ddcolOperationType.DisplayStyle = DataGridViewComboBoxDisplayStyle.DropDownButton;
 
       DataGridViewTextBoxColumn ddcolReplacement = new DataGridViewTextBoxColumn();
       ddcolReplacement.HeaderText = "Replacement";
       ddcolReplacement.DataPropertyName = "ReplacementPath";
       ddcolReplacement.DisplayIndex = 5;
+      ddcolReplacement.Width = 250;
 
       DataGridViewButtonColumn ddcolReplacementGenerate = new DataGridViewButtonColumn();
       ddcolReplacementGenerate.HeaderText = "";
@@ -89,7 +91,7 @@ namespace PaladinsTfc
 
       ddGrid.RowTemplate.MinimumHeight = 25;
       ddGrid.EditMode = DataGridViewEditMode.EditOnEnter;
-      var cols = new List<DataGridViewColumn>(){ddcolValid, ddcolSelectorType, ddcolSelector, ddcolSelectorGenerate, ddcolOperationType, ddcolReplacement, ddcolReplacementGenerate};
+      var cols = new List<DataGridViewColumn>() { ddcolValid, ddcolSelector, ddcolSelectorGenerate, ddcolOperationType, ddcolReplacement, ddcolReplacementGenerate };
       ddGrid.Columns.AddRange(cols.ToArray());
       ddGrid.DataSource = operationList;
       colOfSelectorGenerator = ddGrid.Columns.IndexOf(ddcolSelectorGenerate);
@@ -110,7 +112,7 @@ namespace PaladinsTfc
       ddataColumnEdit.Resizable = DataGridViewTriState.False;*/
     }
 
-    private void Gui_Load(object sender, EventArgs e){
+    private void Gui_Load(object sender, EventArgs e) {
       openFileDialogSelectDirectoryInput = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryInput.IsFolderPicker = true;
       openFileDialogSelectDirectoryInput.RestoreDirectory = true;
@@ -125,11 +127,11 @@ namespace PaladinsTfc
         if (string.IsNullOrEmpty(TFCInputpath)) {
           MessageBox.Show("You must set the TFC Input Directory to use the selector Wizard", "Error");
         } else {
-          var selectorWizard = new paladins_tfc.src.gui.SelectorWizard(TFCInputpath);
+          var selectorWizard = new paladins_tfc.src.gui.SelectorWizard(persitantData);
           selectorWizard.Show(this);
         }
       } else if (e.ColumnIndex == colOfReplacementGenerator) {
-        MessageBox.Show("TODO","Pick File");
+        MessageBox.Show("TODO", "Pick File");
       }
       /*var editingControl = this.ddGrid.EditingControl as DataGridViewComboBoxEditingControl;
       if (editingControl != null)
@@ -149,41 +151,33 @@ namespace PaladinsTfc
         textSelectDirectoryOutput.cursorToRight();
       }
     }
-  }
 
-  public static class SelectOptionSelectorType {
-    public const string FileAndId = "File#Id";
-    public const string FileAndIdRange = "File#Id-Id";
-    public const string File = "File";
-    public const string All = "All";
+    private void Gui_FormClosing(object sender, FormClosingEventArgs e) {
+      persitantData.inputDirectory = textSelectDirectoryInput.Text;
+      persitantData.outputDirectory = textSelectDirectoryOutput.Text;
+      Extentions.dumpObject(persitantData);
+      persitantData.write();
+    }
   }
   public static class SelectOptionOperationType {
     public const string Dump = "Dump";
     public const string Replace = "Replace";
   }
   public class SettingsRow {
-    string selectorType;
     string selector;
     string operation;
     string replacementPath;
+    bool enabled;
 
-    public SettingsRow(string selectorType, string selector, string operation, string replacementPath) {
-      this.selectorType = selectorType;
+    public SettingsRow(string selector, string operation, string replacementPath) {
       this.selector = selector;
       this.operation = operation;
       this.replacementPath = replacementPath;
+      this.enabled = true;
     }
 
     // THE ORDER OF GETTERS MATTER!!!! DO NOT REARRAGNGE
-    public bool Valid { get { 
-      if (this.OperationType == SelectOptionOperationType.Replace) {
-        if (this.SelectorType != SelectOptionSelectorType.FileAndId) {
-          return false;
-        }
-      }
-      return true;
-    }}
-    public string SelectorType { get { return selectorType; } set { selectorType = value; } }
+    public bool Enabled { get { return enabled; } set { enabled = value; } }
     public string Selector { get { return selector; } set { selector = value; } }
     public string OperationType { get { return operation; } set { operation = value; } }
     public string ReplacementPath { get { return replacementPath; } set { replacementPath = value; } }

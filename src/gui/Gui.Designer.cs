@@ -245,6 +245,7 @@ namespace PaladinsTfc
       this.Controls.Add(this.btnRun);
       this.Name = "Gui";
       this.Text = "TFC editor";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Gui_FormClosing);
       this.Load += new System.EventHandler(this.Gui_Load);
       ((System.ComponentModel.ISupportInitialize)(this.ddGrid)).EndInit();
       this.ResumeLayout(false);
