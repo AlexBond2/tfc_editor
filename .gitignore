@@ -8,6 +8,8 @@ example/
 assets/
 out_tfc/
 out_textures/
+_ref/
+out/
 
 py/
 

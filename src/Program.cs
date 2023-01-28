@@ -38,15 +38,23 @@ namespace PaladinsTfc
         description: "path/to/directory containing files that should be hashed"
       );
 
-      Command hashUmodelCommand = new Command ("cooked", "generate hash file for umodel exported (png) images"){folderArg};
-      hashUmodelCommand.SetHandler((string inFolder) => {
-        Hashing.hashDir(inFolder, Hashing.ImgType.PNG);
+      Option outDirectoryOption = new Option<string>(
+        aliases: new string[] { "--output-directory", "-o" },
+        description: "Directory to place hash jsons.\n <path/to/folder>"
+      ); outDirectoryOption.Arity = ArgumentArity.ExactlyOne;
+      outDirectoryOption.SetDefaultValue("./out");
+
+      Command hashUmodelCommand = new Command ("cooked", "generate hash file for umodel exported (png) images"){
+        folderArg, outDirectoryOption};
+      hashUmodelCommand.SetHandler((string inFolder, string outDir) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.PNG, outDir);
       }, folderArg);
 
-      Command hashExportedCommand = new Command ("tfc", "generate hash file for dumped dds images") {folderArg};
-      hashExportedCommand.SetHandler((string inFolder) => {
-        Hashing.hashDir(inFolder, Hashing.ImgType.DDS);
-      }, folderArg);
+      Command hashExportedCommand = new Command ("tfc", "generate hash file for dumped dds images") {
+        folderArg, outDirectoryOption};
+      hashExportedCommand.SetHandler((string inFolder, string outDir) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.DDS, outDir);
+      }, folderArg, outDirectoryOption);
 
       hashCommand.AddCommand(hashExportedCommand);
       hashCommand.AddCommand(hashUmodelCommand);
@@ -70,14 +78,14 @@ namespace PaladinsTfc
         description: "Creates a copy of the tfc file but with textures replaced depending on id\n [(<id>:<path/to/replacement.dds>\")] | ./<args.txt>"
       ); replaceOption.Arity = ArgumentArity.ExactlyOne;
 
-      Option directoryOption = new Option<string>(
+      Option outDirectoryOption = new Option<string>(
         aliases: new string[] { "--output-directory", "-o" },
         description: "Directory to place dumps and/or tfc files.\n <path/to/folder>"
-      ); directoryOption.Arity = ArgumentArity.ExactlyOne;
-      directoryOption.SetDefaultValue("./out");
+      ); outDirectoryOption.Arity = ArgumentArity.ExactlyOne;
+      outDirectoryOption.SetDefaultValue("./out");
 
       Command openCommand = new Command("open", "Parses tfc file and then does [options]") {
-        openArgument, dumpOption, replaceOption, directoryOption
+        openArgument, dumpOption, replaceOption, outDirectoryOption
       }; 
       
       var rootCommand = new RootCommand();
@@ -96,8 +104,8 @@ namespace PaladinsTfc
         }
         Dictionary<int, string> id2replacement = getReplacements(replaceStr);
         HashSet<int> dumpRange = getDumpRange(dumpRangeStr);
-        TexHandling.run(inTfcFile, id2replacement, dumpRange);
-      }, openArgument, dumpOption, replaceOption, directoryOption);
+        TexHandling.run(inTfcFile, directoryStr, id2replacement, dumpRange);
+      }, openArgument, dumpOption, replaceOption, outDirectoryOption);
       return openCommand;
     }
 

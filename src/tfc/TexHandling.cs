@@ -14,6 +14,8 @@ namespace PaladinsTfc
     private static HashSet<int> dumpRange;
     private static Dictionary<int,string> id2replacement;
 
+    private static string GLOB_OutPath;
+
     public class TexBlock {
       public long loc_compressedSize;
       public int compressedSize;
@@ -282,7 +284,7 @@ namespace PaladinsTfc
         
         string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT5";
         string withoutExtension = Path.GetFileNameWithoutExtension(fileName);
-        String outPath = string.Format("out_textures/{0}_{1}_{2}x{3}.dds", 
+        string outPath = string.Format(GLOB_OutPath + "/dump/{0}_{1}_{2}x{3}.dds", 
           withoutExtension, 
           tex.id.ToString("d3"),
           ddsW,
@@ -414,9 +416,16 @@ namespace PaladinsTfc
       ));
     }
     
-    public static void run(string inFile, Dictionary<int,string> arg_id2replacement, HashSet<int> arg_dumpRange){
+    public static void run(
+      string inFile, 
+      string outDir, 
+      Dictionary<int,string> 
+      arg_id2replacement, HashSet<int> 
+      arg_dumpRange
+    ){
       id2replacement = arg_id2replacement;
       dumpRange = arg_dumpRange;
+      GLOB_OutPath = outDir;
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
@@ -432,7 +441,7 @@ namespace PaladinsTfc
       
       if(id2replacement!=null && id2replacement.Count() > 0){
         LZOCompressor lzo = new LZOCompressor(); // NEVER EVER EVER SHARE LZOCompressor from dump
-        string outFile = "out_tfc/"+Path.GetFileName(inFile);
+        string outFile = GLOB_OutPath+ "/edited/" + Path.GetFileName(inFile);
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
         foreach(KeyValuePair<int, string> kv in id2replacement){

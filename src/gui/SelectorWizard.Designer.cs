@@ -111,6 +111,7 @@ namespace paladins_tfc.src.gui
       this.btnSubmitAll.TabIndex = 5;
       this.btnSubmitAll.Text = "Create Filter";
       this.btnSubmitAll.UseVisualStyleBackColor = true;
+      this.btnSubmitAll.Click += new System.EventHandler(this.btnSubmitAll_Click);
       // 
       // tabControl1
       // 
@@ -139,7 +140,6 @@ namespace paladins_tfc.src.gui
       this.all.TabIndex = 0;
       this.all.Text = "All .tfc In Directory";
       this.all.UseVisualStyleBackColor = true;
-      this.all.Enter += new System.EventHandler(this.all_Enter);
       // 
       // labelAll
       // 
@@ -224,6 +224,7 @@ namespace paladins_tfc.src.gui
       this.btnSubmitFilename.TabIndex = 6;
       this.btnSubmitFilename.Text = "Create Filter";
       this.btnSubmitFilename.UseVisualStyleBackColor = true;
+      this.btnSubmitFilename.Click += new System.EventHandler(this.btnSubmitFilename_Click);
       // 
       // filenameAndId
       // 
@@ -319,6 +320,7 @@ namespace paladins_tfc.src.gui
       this.btnSubmitFileNameAndId.TabIndex = 7;
       this.btnSubmitFileNameAndId.Text = "Create Filter";
       this.btnSubmitFileNameAndId.UseVisualStyleBackColor = true;
+      this.btnSubmitFileNameAndId.Click += new System.EventHandler(this.btnSubmitFileNameAndId_Click);
       // 
       // byImageSimilarity
       // 
@@ -377,6 +379,7 @@ namespace paladins_tfc.src.gui
       this.listViewTFC.Size = new System.Drawing.Size(524, 404);
       this.listViewTFC.TabIndex = 46;
       this.listViewTFC.UseCompatibleStateImageBehavior = false;
+      this.listViewTFC.SelectedIndexChanged += new System.EventHandler(this.listViewTFC_SelectedIndexChanged);
       // 
       // checkBox1
       // 
@@ -470,6 +473,7 @@ namespace paladins_tfc.src.gui
       // 
       // sliderFilterResolution
       // 
+      this.sliderFilterResolution.LargeChange = 1;
       this.sliderFilterResolution.Location = new System.Drawing.Point(6, 22);
       this.sliderFilterResolution.Maximum = 6;
       this.sliderFilterResolution.Name = "sliderFilterResolution";
@@ -505,6 +509,11 @@ namespace paladins_tfc.src.gui
       this.numericNoCandidates.Location = new System.Drawing.Point(6, 77);
       this.numericNoCandidates.Maximum = new decimal(new int[] {
             50,
+            0,
+            0,
+            0});
+      this.numericNoCandidates.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
@@ -581,7 +590,6 @@ namespace paladins_tfc.src.gui
       this.textSelectFileHashCooked.RightToLeft = System.Windows.Forms.RightToLeft.No;
       this.textSelectFileHashCooked.Size = new System.Drawing.Size(226, 23);
       this.textSelectFileHashCooked.TabIndex = 34;
-      this.textSelectFileHashCooked.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
       // btnSelectFileHashCooked
       // 
@@ -630,7 +638,6 @@ namespace paladins_tfc.src.gui
       this.textSelectFileHashTFC.ReadOnly = true;
       this.textSelectFileHashTFC.Size = new System.Drawing.Size(226, 23);
       this.textSelectFileHashTFC.TabIndex = 38;
-      this.textSelectFileHashTFC.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
       // btnSelectFileHashTFC
       // 
@@ -659,7 +666,6 @@ namespace paladins_tfc.src.gui
       this.textSelectDirectoryCookedReference.ReadOnly = true;
       this.textSelectDirectoryCookedReference.Size = new System.Drawing.Size(226, 23);
       this.textSelectDirectoryCookedReference.TabIndex = 43;
-      this.textSelectDirectoryCookedReference.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
       // btnSelectDirectoryCookedReference
       // 
@@ -699,6 +705,7 @@ namespace paladins_tfc.src.gui
       this.btnSubmitImageSimilarity.TabIndex = 11;
       this.btnSubmitImageSimilarity.Text = "Create Filter";
       this.btnSubmitImageSimilarity.UseVisualStyleBackColor = true;
+      this.btnSubmitImageSimilarity.Click += new System.EventHandler(this.btnSubmitImageSimilarity_Click);
       // 
       // openFileDialogSelectFileHashCooked
       // 

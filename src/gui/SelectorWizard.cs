@@ -31,11 +31,17 @@ namespace paladins_tfc.src.gui {
     string lastCookedHashPath;
     string lastTFCHashPath;
     Image loadingImage;
+    Image failToLoadImage;
+    Gui parentGui;
+    bool filterIsValid = false;
 
     List<Thread> imageLoaders = new List<Thread>();
+    SettingsRow activeRow;
 
-    public SelectorWizard(PersitantData argPersitantData) {
+    public SelectorWizard(Gui argParentGui, PersitantData argPersitantData) {
       InitializeComponent();
+
+      parentGui = argParentGui;
 
       openFileDialogSelectDirectoryCookedReference = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryCookedReference.IsFolderPicker = true;
@@ -56,21 +62,38 @@ namespace paladins_tfc.src.gui {
       listViewTFC.LargeImageList = imgListTFC;
 
       loadingImage = makeLoadingImage();
+      failToLoadImage = makeFailToLoadImage();
 
       //64 128 256 512 1024 2048 4096
     }
 
-    public Image makeLoadingImage() {
+    public void setDataRow(SettingsRow row) {
+      this.activeRow = row;
+    }
+
+    private Image makeLoadingImage() {
       int width = 128;
       int height = 128;
       Bitmap bmp = new Bitmap(width, height);
       using (Graphics gfx = Graphics.FromImage(bmp))
-      using (SolidBrush brush = new SolidBrush(Color.FromArgb(50, 50, 50))) {
+      using (SolidBrush brush = new SolidBrush(Color.LightGray)) {
         gfx.FillRectangle(brush, 0, 0, width, height);
+        gfx.DrawString("Loading", new Font("Arial", 16), new SolidBrush(Color.Gray), 20, 40);
       }
       return bmp;
     }
-    public bool makeRedIfNotTFCPath(string s, TextBox tb) {
+    private Image makeFailToLoadImage() {
+      int width = 128;
+      int height = 128;
+      Bitmap bmp = new Bitmap(width, height);
+      using (Graphics gfx = Graphics.FromImage(bmp))
+      using (SolidBrush brush = new SolidBrush(Color.Magenta)) {
+        gfx.FillRectangle(brush, 0, 0, width, height);
+        gfx.DrawString("Can't Load\nPreview", new Font("Arial", 16), new SolidBrush(Color.Black), 10, 30);
+      }
+      return bmp;
+    }
+    private bool makeRedIfNotTFCPath(TextBox tb, string s) {
       string failString = null;
       if (string.IsNullOrEmpty(s)) {
         failString = "No TFC file selected";
@@ -86,24 +109,31 @@ namespace paladins_tfc.src.gui {
       return false;
     }
 
-    public void failWith(TextBox tb, string failString) {
+    private void succeedWith(TextBox tb, string succeedString) {
+      filterIsValid = true;
+      tb.BackColor = default(Color);
+      tb.Text = succeedString;
+    }
+    private void failWith(TextBox tb, string failString) {
+      filterIsValid = false;
       tb.BackColor = failColor;
       tb.Text = failString;
     }
-    public void failWithSimilarity(string failString) {
+    private void failWithSimilarity(string failString) {
       failWith(textPreviewImageSimilarity, failString);
     }
 
     private void invalidateFileName() {
-      if (makeRedIfNotTFCPath(textFilenameName.Text, textPreviewFilename)) {
+      string selectedPath = textFilenameName.Text;
+      if (makeRedIfNotTFCPath(textPreviewFilename, selectedPath)) {
         return;
       }
-      textPreviewFilename.BackColor = default(Color);
-      textPreviewFilename.Text = textFilenameAndIdName.Text;
+      succeedWith(textPreviewFilename, selectedPath);
     }
 
     private void invalidateFileNameAndId() {
-      if (makeRedIfNotTFCPath(textFilenameAndIdName.Text, textPreviewFilenameAndId)) {
+      string selectedPath = textFilenameAndIdName.Text;
+      if (makeRedIfNotTFCPath(textPreviewFilenameAndId, selectedPath)) {
         return;
       }
 
@@ -118,7 +148,7 @@ namespace paladins_tfc.src.gui {
           int id = int.Parse(line);
           selectorPattern.Add(id.ToString());
           continue;
-        } catch (Exception e) { 
+        } catch (Exception e) {
         }
         try {
           var nums = line.Split('-');
@@ -141,25 +171,40 @@ namespace paladins_tfc.src.gui {
       }
 
       if (failLine >= 0) {
-        textPreviewFilenameAndId.BackColor = Color.FromArgb(255, Color.FromArgb(0xfb9b9b));
         string linePreview = richTextBoxIdSelect.Lines[failLine].Truncate(20);
-        textPreviewFilenameAndId.Text = $"Error on line: {failLine + 1} ({failMessage}), \"{linePreview}\"";
+        string error = $"Invalid selector on line: {failLine + 1} ({failMessage}), \"{linePreview}\""; ;
+        failWith(textPreviewFilenameAndId, error);
         return;
       }
 
-      textPreviewFilenameAndId.BackColor = default(Color);
       string idSelector = "";
       if (selectorPattern.Count >= 1) {
         idSelector = "#" + string.Join(",", selectorPattern.ToArray());
       }
-      textPreviewFilenameAndId.Text = textFilenameAndIdName.Text + idSelector;
+      succeedWith(textPreviewFilenameAndId, selectedPath + idSelector);
     }
+
+    /*Thread imageInvThread;
+    private void invalidateByImageSimilarity() {
+      if(imageInvThread != null) {
+        imageInvThread.Interrupt();
+        imageInvThread.Join();
+      }
+      imageInvThread = new Thread(
+        new ThreadStart(() => {
+          try {
+            this.Invoke(invalidateByImageSimilarityThread);
+          } catch (Exception) {
+          }
+        })
+      );
+      imageInvThread.Start();
+    }*/
 
     private void invalidateByImageSimilarity() {
       if (this.Width < 1000) {
         this.Width = 1000;
       }
-      failWith(textPreviewImageSimilarity, "Default Dummy Message");
 
       // reload cookedHashes
       string? failReason = tryRemakeHashListIfOutdated(cookedHashes, textSelectFileHashCooked.Text, lastCookedHashPath);
@@ -197,17 +242,38 @@ namespace paladins_tfc.src.gui {
         failWithSimilarity($"No cooked image filter defined");
         return;
       }
-       
+
       // Find cooked Hash
       string cookedFilterFileName = Path.GetRelativePath(cookedRefDir, textCookedFilter.Text);
       if (!cookedHashes.TryGetValue(cookedFilterFileName, out ulong cookedHash)) {
-        failWithSimilarity($"Cooked Hashes do not contain a definition for ${cookedFilterFileName}");
+        failWithSimilarity($"Cooked Hashes do not contain a definition for {cookedFilterFileName}");
+        return;
+      }
+
+      // Filter hashes
+      int filterRes = (int)numericFilterResolution.Value;
+      IEnumerable<KeyValuePair<string, ulong>> filteredTfcHashes;
+      if (checkResolution.Checked) {
+        filteredTfcHashes = tfcHashes.Where((kv) => {
+          string key = kv.Key;
+          HashInfo hi = infoFromHashKey(key);
+          return hi.resolution == filterRes;
+        });
+      } else {
+        filteredTfcHashes = tfcHashes;
+      }
+
+      // Check if no filter matches
+      if (filteredTfcHashes.Count((x) => true) == 0) {
+        failWithSimilarity($"Found tfc matching [resolution={filterRes}]");
+        listViewTFC.Items.Clear();
+        imgListTFC.Images.Clear();
         return;
       }
 
       // Generate similarity scores
-      var similarityScores = new ConcurrentBag<(string,double)>();
-      Parallel.ForEach(tfcHashes, tfcHashItem => {
+      var similarityScores = new ConcurrentBag<(string, double)>();
+      Parallel.ForEach(filteredTfcHashes, tfcHashItem => {
         string tfcFileName = tfcHashItem.Key;
         ulong tfcHash = tfcHashItem.Value;
         double percentageImageSimilarity = CompareHash.Similarity(cookedHash, tfcHash);
@@ -217,7 +283,9 @@ namespace paladins_tfc.src.gui {
 
       // Display
       var sorted = similarityScores.OrderBy((x) => -x.Item2);
-      int nCandidates = (int)Math.Max(3, Math.Min(50, numericNoCandidates.Value));
+      int nCandidates = (int)Math.Max(numericNoCandidates.Minimum, 
+        Math.Min(numericNoCandidates.Maximum, numericNoCandidates.Value)
+      );
 
       foreach (Thread thread in imageLoaders) {
         thread.Interrupt();
@@ -227,9 +295,8 @@ namespace paladins_tfc.src.gui {
       listViewTFC.Items.Clear();
       imgListTFC.Images.Clear();
 
-      Console.WriteLine();
       foreach (var ((name, match), index) in sorted.Take(nCandidates).Select((item, index) => (item, index))) {
-        string tag = $"tag{filename}";
+        string tag = name;
         listViewTFC.Items.Add(new ListViewItem {
           ImageIndex = index,
           Text = $"{match}% Match\n{name}",
@@ -240,12 +307,65 @@ namespace paladins_tfc.src.gui {
         imgListTFC.Images.Add(loadingImage);
         imageLoaders.Add(ddsLoaderThread(index, ddsPath));
 
-        Console.WriteLine($"{cookedFilterFileName} {match}% match with {name}");
+        Console.WriteLine($"{Path.GetFileName(cookedFilterFileName)} {match}% match with {name}");
       }
+      Console.WriteLine();
+      invalidateByImageSimilarityListView();
 
       foreach (var item in imageLoaders) {
         item.Start();
       }
+    }
+    struct HashInfo {
+      public string file;
+      public string fileWithEnding;
+      public int id;
+      public int resolution;
+      public int dxtMode;
+    }
+    private static HashInfo infoFromHashKey(string hashKey) {
+      string[] pathSplit = hashKey.Split("_");
+      int lastindex = pathSplit.Length - 1;
+      string datablock = pathSplit[lastindex];
+      int id = int.Parse(pathSplit[lastindex - 1]);
+      string fileName = string.Join("_", pathSplit[0..(lastindex - 1)]);
+
+      string[] dataBlockSplit = datablock.Split("xDXT");
+      int resolution = int.Parse(dataBlockSplit[0]);
+      string postDXTandmaybeEnding = dataBlockSplit[1];
+      int dxtMode = int.Parse(postDXTandmaybeEnding.Split(".")[0]);
+
+      return new HashInfo() {
+        file = fileName,
+        fileWithEnding = fileName + ".tfc",
+        id = id,
+        resolution = resolution,
+        dxtMode = dxtMode
+      };
+    }
+    private void invalidateByImageSimilarityListView() {
+      var selectedItems = listViewTFC.SelectedItems;
+      if (selectedItems.Count == 0) {
+        failWithSimilarity("No Image Selected");
+        return;
+      }
+      if (selectedItems.Count >= 2) {
+        failWithSimilarity("Multiple Images Selected");
+        return;
+      }
+
+      var selectedItem = listViewTFC.SelectedItems[0];
+      string selectedKey = selectedItem.Tag.ToString();
+      string selector;
+      try {
+        HashInfo hi = infoFromHashKey(selectedKey);
+        selector = $"{hi.fileWithEnding}:{hi.id}";
+      } catch {
+        failWithSimilarity($"ERROR: {selectedKey} is invalid. This is most likely caused by a version mismatch between hash tables and this program");
+        return;
+      }
+
+      succeedWith(textPreviewImageSimilarity, selector);
     }
 
     private Thread ddsLoaderThread(int index, string ddsPath) {
@@ -261,6 +381,8 @@ namespace paladins_tfc.src.gui {
             imgListTFC.Images[index] = scaledImage;
             listViewTFC.Invalidate();
           } catch (Exception e) {
+            imgListTFC.Images[index] = failToLoadImage;
+            Console.WriteLine($"DDS loader thread canceled because {e.Message}");
           }
         })
      );
@@ -331,9 +453,6 @@ namespace paladins_tfc.src.gui {
       }
     }
 
-    private void all_Enter(object sender, EventArgs e) {
-    }
-
     private void filename_Enter(object sender, EventArgs e) {
       invalidateFileName();
     }
@@ -357,24 +476,30 @@ namespace paladins_tfc.src.gui {
 
     private void btnSelectFileHashCooked_Click(object sender, EventArgs e) {
       if (openFileDialogSelectFileHashCooked.ShowDialog() == DialogResult.OK) {
-        textSelectFileHashCooked.Text = openFileDialogSelectFileHashCooked.FileName;
+        persitantData.hashesCooked = openFileDialogSelectFileHashCooked.FileName;
+        textSelectFileHashCooked.Text = persitantData.hashesCooked;
         textSelectFileHashCooked.cursorToRight();
+        persitantData.write();
         invalidateByImageSimilarity();
       }
     }
 
     private void btnSelectFileHashTFC_Click(object sender, EventArgs e) {
       if (openFileDialogSelectFileHashTFC.ShowDialog() == DialogResult.OK) {
-        textSelectFileHashTFC.Text = openFileDialogSelectFileHashTFC.FileName;
+        persitantData.hashesTFC = openFileDialogSelectFileHashTFC.FileName;
+        textSelectFileHashTFC.Text = persitantData.hashesTFC;
         textSelectFileHashTFC.cursorToRight();
+        persitantData.write();
         invalidateByImageSimilarity();
       }
     }
 
     private void btnSelectDirectoryCookedReference_Click(object sender, EventArgs e) {
       if (openFileDialogSelectDirectoryCookedReference.ShowDialog() == CommonFileDialogResult.Ok) {
-        textSelectDirectoryCookedReference.Text = openFileDialogSelectDirectoryCookedReference.FileName;
+        persitantData.cookedReferenceDirectory = openFileDialogSelectDirectoryCookedReference.FileName;
+        textSelectDirectoryCookedReference.Text = persitantData.cookedReferenceDirectory;
         textSelectDirectoryCookedReference.cursorToRight();
+        persitantData.write();
       }
     }
 
@@ -388,7 +513,8 @@ namespace paladins_tfc.src.gui {
 
     private void sliderFilterResolution_Scroll(object sender, EventArgs e) {
       int resolution = (1 << 6) << sliderFilterResolution.Value;
-      numericFilterResolution.Value = resolution; 
+      numericFilterResolution.Value = resolution;
+      invalidateByImageSimilarity();
     }
 
     private void checkCookedImage_CheckedChanged(object sender, EventArgs e) {
@@ -397,13 +523,16 @@ namespace paladins_tfc.src.gui {
 
     private void checkResolution_CheckedChanged(object sender, EventArgs e) {
       groupResolution.Enabled = checkResolution.Checked;
+      invalidateByImageSimilarity();
     }
 
     private void numericFilterResolution_ValueChanged(object sender, EventArgs e) {
       int nLeading0s = BitOperations.LeadingZeroCount((uint)(numericFilterResolution.Value));
       int howMuch64isShifter = 32 - 6 - nLeading0s - 1;
+
       sliderFilterResolution.Value = howMuch64isShifter;
       numericFilterResolution.Value = (1 << 6) << howMuch64isShifter;
+      invalidateByImageSimilarity();
     }
 
     private void checkFileName_CheckedChanged(object sender, EventArgs e) {
@@ -437,10 +566,65 @@ namespace paladins_tfc.src.gui {
       persitantData.cookedReferenceDirectory = textSelectDirectoryCookedReference.Text;
       persitantData.hashesCooked = textSelectFileHashCooked.Text;
       persitantData.hashesTFC = textSelectFileHashTFC.Text;
+      persitantData.write();
+
+      if(e.CloseReason == CloseReason.UserClosing) {
+        e.Cancel = true;
+        this.Hide();
+      }
+    }
+
+    private bool alertIfInvalid(TextBox tb) {
+      if (filterIsValid == false) {
+        MessageBox.Show($"{tb.Text} is not a valid filter");
+        return true;
+      }
+      return false;
+    }
+    private void closeWith(TextBox tb) {
+      activeRow.Selector = tb.Text;
+      Extentions.dumpObject(activeRow);
+      parentGui.invalidateGrid();
+      parentGui.Focus();
+      this.Hide();
     }
 
     private void numericNoCandidates_ValueChanged(object sender, EventArgs e) {
       invalidateByImageSimilarity();
+    }
+
+    private void btnSubmitAll_Click(object sender, EventArgs e) {
+      filterIsValid = true;
+      textPreviewAll.Text = "*";
+      if (alertIfInvalid(textPreviewAll)) {
+        return;
+      }
+      closeWith(textPreviewAll);
+    }
+
+    private void btnSubmitFilename_Click(object sender, EventArgs e) {
+      if (alertIfInvalid(textPreviewFilename)) {
+        return;
+      }
+      closeWith(textPreviewFilename);
+    }
+
+    private void btnSubmitFileNameAndId_Click(object sender, EventArgs e) {
+      if (alertIfInvalid(textPreviewFilenameAndId)) {
+        return;
+      }
+      closeWith(textPreviewFilenameAndId);
+    }
+
+    private void btnSubmitImageSimilarity_Click(object sender, EventArgs e) {
+      if (alertIfInvalid(textPreviewImageSimilarity)) {
+        return;
+      }
+      closeWith(textPreviewImageSimilarity);
+    }
+
+    private void listViewTFC_SelectedIndexChanged(object sender, EventArgs e) {
+      invalidateByImageSimilarityListView();
     }
   }
 }

@@ -20,13 +20,15 @@ namespace PaladinsTfc {
     BindingList<SettingsRow> operationList;
     PersitantData persitantData;
 
+    paladins_tfc.src.gui.SelectorWizard selectorWizard;
+
     public Gui() {
       InitializeComponent();
 
       persitantData = PersitantData.load();
 
       operationList = new BindingList<SettingsRow>();
-      operationList.Add(new SettingsRow("", SelectOptionOperationType.Dump, null));
+      operationList.Add(new SettingsRow());
 
       textSelectDirectoryInput.Text = persitantData.inputDirectory;
       textSelectDirectoryOutput.Text = persitantData.outputDirectory;
@@ -48,7 +50,6 @@ namespace PaladinsTfc {
       ddcolValid.HeaderText = "✔";
       ddcolValid.DataPropertyName = "Enabled";
       ddcolValid.Width = 25;
-      ddcolValid.ReadOnly = true;
       ddcolValid.Resizable = DataGridViewTriState.False;
       ddcolValid.DisplayIndex = 0;
 
@@ -110,6 +111,8 @@ namespace PaladinsTfc {
       ddataColumnDelete.Resizable = DataGridViewTriState.False;
       ddataColumnEdit.Width = 26;
       ddataColumnEdit.Resizable = DataGridViewTriState.False;*/
+
+      selectorWizard = new paladins_tfc.src.gui.SelectorWizard(this, persitantData);
     }
 
     private void Gui_Load(object sender, EventArgs e) {
@@ -127,7 +130,8 @@ namespace PaladinsTfc {
         if (string.IsNullOrEmpty(TFCInputpath)) {
           MessageBox.Show("You must set the TFC Input Directory to use the selector Wizard", "Error");
         } else {
-          var selectorWizard = new paladins_tfc.src.gui.SelectorWizard(persitantData);
+          var selectedSettingsRow = (SettingsRow)(ddGrid.Rows[e.RowIndex].DataBoundItem);
+          selectorWizard.setDataRow(selectedSettingsRow);
           selectorWizard.Show(this);
         }
       } else if (e.ColumnIndex == colOfReplacementGenerator) {
@@ -140,23 +144,56 @@ namespace PaladinsTfc {
 
     private void btnSelectDirectoryInput_Click(object sender, EventArgs e) {
       if (openFileDialogSelectDirectoryInput.ShowDialog() == CommonFileDialogResult.Ok) {
-        textSelectDirectoryInput.Text = openFileDialogSelectDirectoryInput.FileName;
+        persitantData.inputDirectory = openFileDialogSelectDirectoryInput.FileName;
+        textSelectDirectoryInput.Text = persitantData.inputDirectory;
         textSelectDirectoryInput.cursorToRight();
+        persitantData.write();
       }
     }
 
     private void btnSelectDirectoryOutput_Click(object sender, EventArgs e) {
       if (openFileDialogSelectDirectoryOutput.ShowDialog() == CommonFileDialogResult.Ok) {
-        textSelectDirectoryOutput.Text = openFileDialogSelectDirectoryOutput.FileName;
-        textSelectDirectoryOutput.cursorToRight();
+        persitantData.outputDirectory = openFileDialogSelectDirectoryOutput.FileName;
+        textSelectDirectoryOutput.Text = persitantData.outputDirectory;
+        textSelectDirectoryOutput.cursorToRight();persitantData.write();
+        persitantData.write();
       }
     }
 
     private void Gui_FormClosing(object sender, FormClosingEventArgs e) {
       persitantData.inputDirectory = textSelectDirectoryInput.Text;
       persitantData.outputDirectory = textSelectDirectoryOutput.Text;
-      Extentions.dumpObject(persitantData);
       persitantData.write();
+    }
+
+    public void invalidateGrid() {
+      ddGrid.Invalidate();
+    }
+
+    private void btnRun_Click(object sender, EventArgs e) {
+      MessageBox.Show("TODO");
+    }
+
+    private void btnOperationAdd_Click(object sender, EventArgs e) {
+      operationList.Add(new SettingsRow());
+    }
+
+    private void btnOperationDuplicate_Click(object sender, EventArgs e) {
+      SettingsRow activeRow = (SettingsRow)ddGrid.CurrentRow.DataBoundItem;
+      operationList.Add(new SettingsRow(
+        activeRow.Selector, 
+        activeRow.OperationType, 
+        activeRow.ReplacementPath, 
+        activeRow.Enabled
+      ));
+    }
+
+    private void btnOperationDelete_Click(object sender, EventArgs e) {
+      ddGrid.Rows.RemoveAt(ddGrid.CurrentRow.Index);
+      var rows = ddGrid.SelectedRows;
+      foreach (DataGridViewRow row in ddGrid.SelectedRows) {
+        ddGrid.Rows.RemoveAt(row.Index);
+      }
     }
   }
   public static class SelectOptionOperationType {
@@ -169,11 +206,16 @@ namespace PaladinsTfc {
     string replacementPath;
     bool enabled;
 
-    public SettingsRow(string selector, string operation, string replacementPath) {
+    public SettingsRow(
+      string selector = "",
+      string operation = SelectOptionOperationType.Dump,
+      string replacementPath = "",
+      bool enabled = true
+      ) {
       this.selector = selector;
       this.operation = operation;
       this.replacementPath = replacementPath;
-      this.enabled = true;
+      this.enabled = enabled;
     }
 
     // THE ORDER OF GETTERS MATTER!!!! DO NOT REARRAGNGE

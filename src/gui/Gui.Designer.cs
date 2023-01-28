@@ -79,6 +79,7 @@ namespace PaladinsTfc
       this.btnOperationAdd.TabIndex = 11;
       this.btnOperationAdd.Text = "Add Operation";
       this.btnOperationAdd.UseVisualStyleBackColor = true;
+      this.btnOperationAdd.Click += new System.EventHandler(this.btnOperationAdd_Click);
       // 
       // btnRun
       // 
@@ -89,6 +90,7 @@ namespace PaladinsTfc
       this.btnRun.TabIndex = 12;
       this.btnRun.Text = "Run Operations";
       this.btnRun.UseVisualStyleBackColor = true;
+      this.btnRun.Click += new System.EventHandler(this.btnRun_Click);
       // 
       // btnOperationSave
       // 
@@ -126,7 +128,6 @@ namespace PaladinsTfc
       this.textSelectDirectoryInput.ReadOnly = true;
       this.textSelectDirectoryInput.Size = new System.Drawing.Size(226, 23);
       this.textSelectDirectoryInput.TabIndex = 18;
-      this.textSelectDirectoryInput.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
       // labelSelectDirectoryOutput
       // 
@@ -166,7 +167,6 @@ namespace PaladinsTfc
       this.textSelectDirectoryOutput.ReadOnly = true;
       this.textSelectDirectoryOutput.Size = new System.Drawing.Size(226, 23);
       this.textSelectDirectoryOutput.TabIndex = 22;
-      this.textSelectDirectoryOutput.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
       // 
       // labelRun
       // 
@@ -187,6 +187,7 @@ namespace PaladinsTfc
       this.btnOperationDuplicate.TabIndex = 27;
       this.btnOperationDuplicate.Text = "Duplicate Operation";
       this.btnOperationDuplicate.UseVisualStyleBackColor = true;
+      this.btnOperationDuplicate.Click += new System.EventHandler(this.btnOperationDuplicate_Click);
       // 
       // ddGrid
       // 
@@ -220,12 +221,15 @@ namespace PaladinsTfc
       this.btnOperationDelete.TabIndex = 30;
       this.btnOperationDelete.Text = "Delete Operation";
       this.btnOperationDelete.UseVisualStyleBackColor = true;
+      this.btnOperationDelete.Click += new System.EventHandler(this.btnOperationDelete_Click);
       // 
       // Gui
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(1027, 710);
+      this.Controls.Add(this.richTextLog);
+      this.Controls.Add(this.btnRun);
       this.Controls.Add(this.btnOperationAdd);
       this.Controls.Add(this.labelSelectDirectoryInput);
       this.Controls.Add(this.textSelectDirectoryInput);
@@ -240,9 +244,7 @@ namespace PaladinsTfc
       this.Controls.Add(this.btnOperationLoad);
       this.Controls.Add(this.ddGrid);
       this.Controls.Add(this.labelLog);
-      this.Controls.Add(this.richTextLog);
       this.Controls.Add(this.labelRun);
-      this.Controls.Add(this.btnRun);
       this.Name = "Gui";
       this.Text = "TFC editor";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Gui_FormClosing);

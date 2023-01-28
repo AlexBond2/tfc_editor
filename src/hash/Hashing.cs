@@ -25,7 +25,7 @@ namespace PaladinsTfc
       }
     }  
 
-    public static void hashDir(string dirpath, ImgType imgType){
+    public static void hashDir(string dirpath, ImgType imgType, string outpath) {
       string typeName = null;
 
       if (imgType == ImgType.PNG) typeName = "png";
@@ -35,7 +35,7 @@ namespace PaladinsTfc
       Regex rx = new Regex(@"[^a-zA-Z0-9_\-]",RegexOptions.Compiled | RegexOptions.IgnoreCase);
       string dirpathSafe = "TextureHashes_"+rx.Replace(dirpath, "_");
       string searchPattern = "*."+typeName;
-      string outFile = $"out/{dirpathSafe}_{typeName}.json";
+      string outFile = $"{outpath}/hashes/{dirpathSafe}_{typeName}.json";
       DifferenceHash hasher = new DifferenceHash();
       
       string[] imgPaths = Directory.GetFiles(dirpath, searchPattern, SearchOption.AllDirectories);
