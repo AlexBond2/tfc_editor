@@ -53,11 +53,14 @@ namespace paladins_tfc.src.gui
       this.textPreviewFilenameAndId = new System.Windows.Forms.TextBox();
       this.btnSubmitFileNameAndId = new System.Windows.Forms.Button();
       this.byImageSimilarity = new System.Windows.Forms.TabPage();
-      this.button1 = new System.Windows.Forms.Button();
+      this.btnDumpPreviews = new System.Windows.Forms.Button();
       this.listViewTFC = new System.Windows.Forms.ListView();
-      this.checkBox1 = new System.Windows.Forms.CheckBox();
       this.checkFileName = new System.Windows.Forms.CheckBox();
       this.groupFileName = new System.Windows.Forms.GroupBox();
+      this.textNameIncludeFilter = new System.Windows.Forms.TextBox();
+      this.textNameExcludeFilter = new System.Windows.Forms.TextBox();
+      this.label6 = new System.Windows.Forms.Label();
+      this.label5 = new System.Windows.Forms.Label();
       this.checkResolution = new System.Windows.Forms.CheckBox();
       this.checkCookedImage = new System.Windows.Forms.CheckBox();
       this.groupResolution = new System.Windows.Forms.GroupBox();
@@ -94,6 +97,7 @@ namespace paladins_tfc.src.gui
       this.filename.SuspendLayout();
       this.filenameAndId.SuspendLayout();
       this.byImageSimilarity.SuspendLayout();
+      this.groupFileName.SuspendLayout();
       this.groupResolution.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericFilterResolution)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.sliderFilterResolution)).BeginInit();
@@ -125,7 +129,7 @@ namespace paladins_tfc.src.gui
       this.tabControl1.Location = new System.Drawing.Point(12, 12);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(764, 598);
+      this.tabControl1.Size = new System.Drawing.Size(760, 611);
       this.tabControl1.TabIndex = 6;
       // 
       // all
@@ -136,7 +140,7 @@ namespace paladins_tfc.src.gui
       this.all.Location = new System.Drawing.Point(4, 24);
       this.all.Name = "all";
       this.all.Padding = new System.Windows.Forms.Padding(3);
-      this.all.Size = new System.Drawing.Size(756, 570);
+      this.all.Size = new System.Drawing.Size(752, 583);
       this.all.TabIndex = 0;
       this.all.Text = "All .tfc In Directory";
       this.all.UseVisualStyleBackColor = true;
@@ -172,7 +176,7 @@ namespace paladins_tfc.src.gui
       this.filename.Location = new System.Drawing.Point(4, 24);
       this.filename.Name = "filename";
       this.filename.Padding = new System.Windows.Forms.Padding(3);
-      this.filename.Size = new System.Drawing.Size(756, 570);
+      this.filename.Size = new System.Drawing.Size(752, 583);
       this.filename.TabIndex = 1;
       this.filename.Text = "By Filename";
       this.filename.UseVisualStyleBackColor = true;
@@ -238,7 +242,7 @@ namespace paladins_tfc.src.gui
       this.filenameAndId.Controls.Add(this.btnSubmitFileNameAndId);
       this.filenameAndId.Location = new System.Drawing.Point(4, 24);
       this.filenameAndId.Name = "filenameAndId";
-      this.filenameAndId.Size = new System.Drawing.Size(756, 570);
+      this.filenameAndId.Size = new System.Drawing.Size(752, 583);
       this.filenameAndId.TabIndex = 2;
       this.filenameAndId.Text = "By Filename and Id";
       this.filenameAndId.UseVisualStyleBackColor = true;
@@ -324,9 +328,8 @@ namespace paladins_tfc.src.gui
       // 
       // byImageSimilarity
       // 
-      this.byImageSimilarity.Controls.Add(this.button1);
+      this.byImageSimilarity.Controls.Add(this.btnDumpPreviews);
       this.byImageSimilarity.Controls.Add(this.listViewTFC);
-      this.byImageSimilarity.Controls.Add(this.checkBox1);
       this.byImageSimilarity.Controls.Add(this.checkFileName);
       this.byImageSimilarity.Controls.Add(this.groupFileName);
       this.byImageSimilarity.Controls.Add(this.checkResolution);
@@ -351,22 +354,23 @@ namespace paladins_tfc.src.gui
       this.byImageSimilarity.Controls.Add(this.btnSubmitImageSimilarity);
       this.byImageSimilarity.Location = new System.Drawing.Point(4, 24);
       this.byImageSimilarity.Name = "byImageSimilarity";
-      this.byImageSimilarity.Size = new System.Drawing.Size(756, 570);
+      this.byImageSimilarity.Size = new System.Drawing.Size(752, 583);
       this.byImageSimilarity.TabIndex = 3;
       this.byImageSimilarity.Text = "By Image Similarity";
       this.byImageSimilarity.UseVisualStyleBackColor = true;
       this.byImageSimilarity.Enter += new System.EventHandler(this.byImageSimilarity_Enter);
       // 
-      // button1
+      // btnDumpPreviews
       // 
-      this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.button1.BackColor = System.Drawing.Color.LightGray;
-      this.button1.Location = new System.Drawing.Point(622, 109);
-      this.button1.Name = "button1";
-      this.button1.Size = new System.Drawing.Size(128, 23);
-      this.button1.TabIndex = 60;
-      this.button1.Text = "Dump Previews (F5)";
-      this.button1.UseVisualStyleBackColor = false;
+      this.btnDumpPreviews.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.btnDumpPreviews.BackColor = System.Drawing.Color.LightGray;
+      this.btnDumpPreviews.Location = new System.Drawing.Point(618, 109);
+      this.btnDumpPreviews.Name = "btnDumpPreviews";
+      this.btnDumpPreviews.Size = new System.Drawing.Size(128, 23);
+      this.btnDumpPreviews.TabIndex = 60;
+      this.btnDumpPreviews.Text = "Dump Previews";
+      this.btnDumpPreviews.UseVisualStyleBackColor = false;
+      this.btnDumpPreviews.Click += new System.EventHandler(this.btnDumpPreviews_Click);
       // 
       // listViewTFC
       // 
@@ -376,22 +380,10 @@ namespace paladins_tfc.src.gui
       this.listViewTFC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.listViewTFC.Location = new System.Drawing.Point(226, 131);
       this.listViewTFC.Name = "listViewTFC";
-      this.listViewTFC.Size = new System.Drawing.Size(524, 404);
+      this.listViewTFC.Size = new System.Drawing.Size(520, 417);
       this.listViewTFC.TabIndex = 46;
       this.listViewTFC.UseCompatibleStateImageBehavior = false;
       this.listViewTFC.SelectedIndexChanged += new System.EventHandler(this.listViewTFC_SelectedIndexChanged);
-      // 
-      // checkBox1
-      // 
-      this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.checkBox1.AutoSize = true;
-      this.checkBox1.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-      this.checkBox1.Location = new System.Drawing.Point(479, 112);
-      this.checkBox1.Name = "checkBox1";
-      this.checkBox1.Size = new System.Drawing.Size(137, 19);
-      this.checkBox1.TabIndex = 59;
-      this.checkBox1.Text = "Auto Dump Previews";
-      this.checkBox1.UseVisualStyleBackColor = true;
       // 
       // checkFileName
       // 
@@ -405,13 +397,53 @@ namespace paladins_tfc.src.gui
       // 
       // groupFileName
       // 
+      this.groupFileName.Controls.Add(this.textNameIncludeFilter);
+      this.groupFileName.Controls.Add(this.textNameExcludeFilter);
+      this.groupFileName.Controls.Add(this.label6);
+      this.groupFileName.Controls.Add(this.label5);
       this.groupFileName.Enabled = false;
       this.groupFileName.Location = new System.Drawing.Point(6, 424);
       this.groupFileName.Name = "groupFileName";
-      this.groupFileName.Size = new System.Drawing.Size(214, 100);
+      this.groupFileName.Size = new System.Drawing.Size(214, 124);
       this.groupFileName.TabIndex = 57;
       this.groupFileName.TabStop = false;
       this.groupFileName.Text = "    File Name";
+      // 
+      // textNameIncludeFilter
+      // 
+      this.textNameIncludeFilter.Location = new System.Drawing.Point(6, 37);
+      this.textNameIncludeFilter.Name = "textNameIncludeFilter";
+      this.textNameIncludeFilter.Size = new System.Drawing.Size(202, 23);
+      this.textNameIncludeFilter.TabIndex = 1;
+      this.textNameIncludeFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textNameIncludeFilter_KeyDown);
+      this.textNameIncludeFilter.Leave += new System.EventHandler(this.textNameIncludeFilter_Leave);
+      // 
+      // textNameExcludeFilter
+      // 
+      this.textNameExcludeFilter.Location = new System.Drawing.Point(6, 81);
+      this.textNameExcludeFilter.Name = "textNameExcludeFilter";
+      this.textNameExcludeFilter.Size = new System.Drawing.Size(201, 23);
+      this.textNameExcludeFilter.TabIndex = 3;
+      this.textNameExcludeFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textNameExcludeFilter_KeyDown);
+      this.textNameExcludeFilter.Leave += new System.EventHandler(this.textNameExcludeFilter_Leave);
+      // 
+      // label6
+      // 
+      this.label6.AutoSize = true;
+      this.label6.Location = new System.Drawing.Point(6, 63);
+      this.label6.Name = "label6";
+      this.label6.Size = new System.Drawing.Size(191, 15);
+      this.label6.TabIndex = 2;
+      this.label6.Text = "Exclude all TFC Names Containing:";
+      // 
+      // label5
+      // 
+      this.label5.AutoSize = true;
+      this.label5.Location = new System.Drawing.Point(4, 19);
+      this.label5.Name = "label5";
+      this.label5.Size = new System.Drawing.Size(202, 15);
+      this.label5.TabIndex = 0;
+      this.label5.Text = "Only Include TFC Names Containing:";
       // 
       // checkResolution
       // 
@@ -690,16 +722,16 @@ namespace paladins_tfc.src.gui
       // 
       this.textPreviewImageSimilarity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.textPreviewImageSimilarity.Location = new System.Drawing.Point(6, 541);
+      this.textPreviewImageSimilarity.Location = new System.Drawing.Point(6, 554);
       this.textPreviewImageSimilarity.Name = "textPreviewImageSimilarity";
       this.textPreviewImageSimilarity.ReadOnly = true;
-      this.textPreviewImageSimilarity.Size = new System.Drawing.Size(637, 23);
+      this.textPreviewImageSimilarity.Size = new System.Drawing.Size(633, 23);
       this.textPreviewImageSimilarity.TabIndex = 10;
       // 
       // btnSubmitImageSimilarity
       // 
       this.btnSubmitImageSimilarity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnSubmitImageSimilarity.Location = new System.Drawing.Point(649, 541);
+      this.btnSubmitImageSimilarity.Location = new System.Drawing.Point(645, 554);
       this.btnSubmitImageSimilarity.Name = "btnSubmitImageSimilarity";
       this.btnSubmitImageSimilarity.Size = new System.Drawing.Size(101, 23);
       this.btnSubmitImageSimilarity.TabIndex = 11;
@@ -712,11 +744,13 @@ namespace paladins_tfc.src.gui
       this.openFileDialogSelectFileHashCooked.DefaultExt = "json";
       this.openFileDialogSelectFileHashCooked.Filter = "json files (*.json)|*.json";
       this.openFileDialogSelectFileHashCooked.RestoreDirectory = true;
+      this.openFileDialogSelectFileHashCooked.Title = "Select Cooked Hashes Json File";
       // 
       // openFileDialogSelectFileHashTFC
       // 
       this.openFileDialogSelectFileHashTFC.DefaultExt = "json";
       this.openFileDialogSelectFileHashTFC.Filter = "json files (*.json)|*.json";
+      this.openFileDialogSelectFileHashTFC.Title = "Select TFC Hashes Json File";
       // 
       // imgListTFC
       // 
@@ -729,12 +763,13 @@ namespace paladins_tfc.src.gui
       this.openFileDialogCookedFilter.DefaultExt = "png";
       this.openFileDialogCookedFilter.Filter = "png files (*.png)|*.png";
       this.openFileDialogCookedFilter.RestoreDirectory = true;
+      this.openFileDialogCookedFilter.Title = "Select Cooked Image Png";
       // 
       // SelectorWizard
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(788, 622);
+      this.ClientSize = new System.Drawing.Size(784, 635);
       this.Controls.Add(this.tabControl1);
       this.Name = "SelectorWizard";
       this.Text = "Selector Wizard";
@@ -748,6 +783,8 @@ namespace paladins_tfc.src.gui
       this.filenameAndId.PerformLayout();
       this.byImageSimilarity.ResumeLayout(false);
       this.byImageSimilarity.PerformLayout();
+      this.groupFileName.ResumeLayout(false);
+      this.groupFileName.PerformLayout();
       this.groupResolution.ResumeLayout(false);
       this.groupResolution.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericFilterResolution)).EndInit();
@@ -815,9 +852,12 @@ namespace paladins_tfc.src.gui
     private CheckBox checkFileName;
     private GroupBox groupFileName;
     private OpenFileDialog openFileDialogCookedFilter;
-    private Button button1;
-    private CheckBox checkBox1;
+    private Button btnDumpPreviews;
     private Label label4;
     private NumericUpDown numericNoCandidates;
+    private TextBox textNameIncludeFilter;
+    private Label label5;
+    private TextBox textNameExcludeFilter;
+    private Label label6;
   }
 }

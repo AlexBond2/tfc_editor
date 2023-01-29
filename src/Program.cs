@@ -19,7 +19,7 @@ namespace PaladinsTfc
       //Application.EnableVisualStyles();
       Application.Run(new Gui());
     }
-    private static void commandline(string[] args){
+    public static void commandline(string[] args){
       RootCommand rootCommand = new RootCommand();
 
       Command openCommand = getOpenCommand();
@@ -44,17 +44,23 @@ namespace PaladinsTfc
       ); outDirectoryOption.Arity = ArgumentArity.ExactlyOne;
       outDirectoryOption.SetDefaultValue("./out");
 
+      Option filterOption = new Option<string>(
+        aliases: new string[] { "--filter", "-f" },
+        description: "Ignore all tfc that doesn't contain filter.\n <string>"
+      ); filterOption.Arity = ArgumentArity.ExactlyOne;
+      filterOption.SetDefaultValue("*");
+
       Command hashUmodelCommand = new Command ("cooked", "generate hash file for umodel exported (png) images"){
-        folderArg, outDirectoryOption};
-      hashUmodelCommand.SetHandler((string inFolder, string outDir) => {
-        Hashing.hashDir(inFolder, Hashing.ImgType.PNG, outDir);
-      }, folderArg);
+        folderArg, outDirectoryOption, filterOption};
+      hashUmodelCommand.SetHandler((string inFolder, string outDir, string filter) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.PNG, outDir, filter);
+      }, folderArg, outDirectoryOption, filterOption);
 
       Command hashExportedCommand = new Command ("tfc", "generate hash file for dumped dds images") {
-        folderArg, outDirectoryOption};
-      hashExportedCommand.SetHandler((string inFolder, string outDir) => {
-        Hashing.hashDir(inFolder, Hashing.ImgType.DDS, outDir);
-      }, folderArg, outDirectoryOption);
+        folderArg, outDirectoryOption, filterOption};
+      hashExportedCommand.SetHandler((string inFolder, string outDir, string filter) => {
+        Hashing.hashDir(inFolder, Hashing.ImgType.DDS, outDir, filter);
+      }, folderArg, outDirectoryOption, filterOption);
 
       hashCommand.AddCommand(hashExportedCommand);
       hashCommand.AddCommand(hashUmodelCommand);

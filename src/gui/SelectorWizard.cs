@@ -46,6 +46,7 @@ namespace paladins_tfc.src.gui {
       openFileDialogSelectDirectoryCookedReference = new Microsoft.WindowsAPICodePack.Dialogs.CommonOpenFileDialog();
       openFileDialogSelectDirectoryCookedReference.IsFolderPicker = true;
       openFileDialogSelectDirectoryCookedReference.RestoreDirectory = true;
+      openFileDialogSelectDirectoryCookedReference.Title = "Select Directory Containing Cooked Assets";
 
       persitantData = argPersitantData;
       textSelectDirectoryCookedReference.Text = persitantData.cookedReferenceDirectory;
@@ -250,22 +251,42 @@ namespace paladins_tfc.src.gui {
         return;
       }
 
-      // Filter hashes
-      int filterRes = (int)numericFilterResolution.Value;
+      // Filter hashes resolution
       IEnumerable<KeyValuePair<string, ulong>> filteredTfcHashes;
-      if (checkResolution.Checked) {
-        filteredTfcHashes = tfcHashes.Where((kv) => {
-          string key = kv.Key;
-          HashInfo hi = infoFromHashKey(key);
-          return hi.resolution == filterRes;
-        });
-      } else {
-        filteredTfcHashes = tfcHashes;
-      }
+
+      int filterRes = (int)numericFilterResolution.Value;
+      string nameIncludeFilter = textNameIncludeFilter.Text;
+      bool nameIncludeFilterEnabled = !string.IsNullOrEmpty(nameIncludeFilter);
+      string nameExcludeFilter = textNameExcludeFilter.Text;
+      bool nameExcludeFilterEnabled = !string.IsNullOrEmpty(nameExcludeFilter);
+      bool resolutionFilterChecked = checkResolution.Checked;
+      bool nameFilterChecked = checkFileName.Checked;
+      filteredTfcHashes = tfcHashes.Where((kv) => {
+        string key = kv.Key;
+        HashInfo hi = infoFromHashKey(key);
+        if (resolutionFilterChecked) {
+          if (hi.resolution != filterRes) {
+            return false;
+          }
+        }
+        if (nameFilterChecked) {
+          if (nameIncludeFilterEnabled) {
+            if (hi.unparsedName.Contains(nameIncludeFilter) == false) {
+              return false;
+            }
+          }
+          if (nameExcludeFilterEnabled) {
+            if (hi.unparsedName.Contains(nameExcludeFilter)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      });
 
       // Check if no filter matches
       if (filteredTfcHashes.Count((x) => true) == 0) {
-        failWithSimilarity($"Found tfc matching [resolution={filterRes}]");
+        failWithSimilarity($"Found no tfc matching filters");
         listViewTFC.Items.Clear();
         imgListTFC.Images.Clear();
         return;
@@ -306,10 +327,7 @@ namespace paladins_tfc.src.gui {
         //imgListTFC.Images.Add(loadDDS(ddsPath));
         imgListTFC.Images.Add(loadingImage);
         imageLoaders.Add(ddsLoaderThread(index, ddsPath));
-
-        Console.WriteLine($"{Path.GetFileName(cookedFilterFileName)} {match}% match with {name}");
       }
-      Console.WriteLine();
       invalidateByImageSimilarityListView();
 
       foreach (var item in imageLoaders) {
@@ -317,11 +335,12 @@ namespace paladins_tfc.src.gui {
       }
     }
     struct HashInfo {
-      public string file;
+      public string fileWithoutEnding;
       public string fileWithEnding;
       public int id;
       public int resolution;
       public int dxtMode;
+      public string unparsedName;
     }
     private static HashInfo infoFromHashKey(string hashKey) {
       string[] pathSplit = hashKey.Split("_");
@@ -336,11 +355,12 @@ namespace paladins_tfc.src.gui {
       int dxtMode = int.Parse(postDXTandmaybeEnding.Split(".")[0]);
 
       return new HashInfo() {
-        file = fileName,
+        fileWithoutEnding = fileName,
         fileWithEnding = fileName + ".tfc",
         id = id,
         resolution = resolution,
-        dxtMode = dxtMode
+        dxtMode = dxtMode,
+        unparsedName = hashKey
       };
     }
     private void invalidateByImageSimilarityListView() {
@@ -381,8 +401,8 @@ namespace paladins_tfc.src.gui {
             imgListTFC.Images[index] = scaledImage;
             listViewTFC.Invalidate();
           } catch (Exception e) {
-            imgListTFC.Images[index] = failToLoadImage;
-            Console.WriteLine($"DDS loader thread canceled because {e.Message}");
+            //imgListTFC.Images[index] = failToLoadImage;
+            Console.WriteLine($"UI: DDS loader thread canceled because {e.Message}");
           }
         })
      );
@@ -504,11 +524,50 @@ namespace paladins_tfc.src.gui {
     }
 
     private void btnGenerateHashCooked_Click(object sender, EventArgs e) {
-      MessageBox.Show("TODO: generate cooked hashes");
+      string hashDir = textSelectDirectoryCookedReference.Text;
+      string outDir = persitantData.outputDirectory;
+      if (string.IsNullOrEmpty(hashDir)) {
+        MessageBox.Show("Error", "Error, \"Cooked Reference Directory\" not set.");
+        return;
+      }
+      if (string.IsNullOrEmpty(outDir)) {
+        MessageBox.Show("Error", "Error, \"Output Directory\" not set.");
+        return;
+      }
+
+      DialogResult dr = MessageBox.Show($"Generate hash table based of directory: {hashDir}?", "Info", MessageBoxButtons.OKCancel);
+      if (dr == DialogResult.OK) {
+        var command = new List<string>() {
+        "hash", "cooked", hashDir, "--output-directory", outDir
+        };
+        parentGui.Focus();
+        this.Hide();
+        Extentions.invokeSomeway(this.parentGui, new MethodInvoker(() => {
+          parentGui.runCommands(new List<List<string>>() { command });
+        }));
+      }
     }
 
     private void btnGenerateHashTFC_Click(object sender, EventArgs e) {
-      MessageBox.Show("TODO: generate TFC hashes");
+      string outDir = persitantData.outputDirectory;
+      string hashDirRoot = outDir ;
+      if (string.IsNullOrEmpty(hashDirRoot)) {
+        MessageBox.Show("Error", "Error, \"Output Directory\" not set.");
+        return;
+      }
+      string hashDir = Path.Combine(hashDirRoot, "dump");
+
+      DialogResult dr = MessageBox.Show("Generate hash table based of your already dumped files?", "Info", MessageBoxButtons.OKCancel);
+      if (dr == DialogResult.OK) {
+        var command = new List<string>() {
+          "hash", "tfc", hashDir, "--output-directory", outDir
+        }; 
+        parentGui.Focus();
+        this.Hide();
+        Extentions.invokeSomeway(this.parentGui, new MethodInvoker(() => {
+          parentGui.runCommands(new List<List<string>>() { command });
+        }));
+      }
     }
 
     private void sliderFilterResolution_Scroll(object sender, EventArgs e) {
@@ -583,7 +642,6 @@ namespace paladins_tfc.src.gui {
     }
     private void closeWith(TextBox tb) {
       activeRow.Selector = tb.Text;
-      Extentions.dumpObject(activeRow);
       parentGui.invalidateGrid();
       parentGui.Focus();
       this.Hide();
@@ -625,6 +683,30 @@ namespace paladins_tfc.src.gui {
 
     private void listViewTFC_SelectedIndexChanged(object sender, EventArgs e) {
       invalidateByImageSimilarityListView();
+    }
+
+    private void textNameIncludeFilter_Leave(object sender, EventArgs e) {
+      invalidateByImageSimilarity();
+    }
+
+    private void textNameExcludeFilter_Leave(object sender, EventArgs e) {
+      invalidateByImageSimilarity();
+    }
+
+    private void textNameIncludeFilter_KeyDown(object sender, KeyEventArgs e) {
+      if (e.KeyCode == Keys.Enter) {
+        invalidateByImageSimilarity();
+      }
+    }
+
+    private void textNameExcludeFilter_KeyDown(object sender, KeyEventArgs e) {
+      if (e.KeyCode == Keys.Enter) {
+        invalidateByImageSimilarity();
+      }
+    }
+
+    private void btnDumpPreviews_Click(object sender, EventArgs e) {
+      MessageBox.Show("Not implemented, for now you MUST have a full dump of all tfcs in order to see previews", "TODO");
     }
   }
 }

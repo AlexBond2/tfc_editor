@@ -21,6 +21,13 @@ namespace PaladinsTfcExtend
       }
       Console.WriteLine("}");
     }
+    public static void invokeSomeway(Control control, MethodInvoker mi) {
+      if (control.InvokeRequired) {
+        control.BeginInvoke(mi);
+      } else {
+        mi.Invoke();
+      }
+    }
   }
   public class PersitantData {
     private const string configurationPath = "configuration.json";

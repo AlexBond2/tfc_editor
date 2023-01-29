@@ -25,21 +25,30 @@ namespace PaladinsTfc
       }
     }  
 
-    public static void hashDir(string dirpath, ImgType imgType, string outpath) {
-      string typeName = null;
+    public static void hashDir(string dirpath, ImgType imgType, string outpath, string filter) {
+      string typeName;
 
-      if (imgType == ImgType.PNG) typeName = "png";
-      else if (imgType == ImgType.DDS) typeName = "dds";
-      else throw new Exception ("can only open dds and png files");
+      if (imgType == ImgType.PNG) {
+        typeName = "png";
+      } else if (imgType == ImgType.DDS) {
+        typeName = "dds";
+      } else throw new Exception("can only open dds and png files");
 
       Regex rx = new Regex(@"[^a-zA-Z0-9_\-]",RegexOptions.Compiled | RegexOptions.IgnoreCase);
-      string dirpathSafe = "TextureHashes_"+rx.Replace(dirpath, "_");
-      string searchPattern = "*."+typeName;
-      string outFile = $"{outpath}/hashes/{dirpathSafe}_{typeName}.json";
+      //string dirpathSafe = "TextureHashes_"+rx.Replace(dirpath, "_");
+      string searchPattern = $"{filter}.{typeName}";
+      string fileName = rx.Replace($"TextureHashes_{typeName.ToUpper()}_{filter}", "_");
+      string outFile = $"{outpath}/hashes/{fileName}.json";
       DifferenceHash hasher = new DifferenceHash();
       
       string[] imgPaths = Directory.GetFiles(dirpath, searchPattern, SearchOption.AllDirectories);
-      Console.WriteLine($"found {imgPaths.Length} files in: {dirpath} using {imgType} \n writing hashes to: {outFile}");
+      Console.WriteLine($"found {imgPaths.Length} files in: {dirpath} {imgType} images using {searchPattern} \n writing hashes to: {outFile}");
+
+      if (imgPaths.Length == 0) {
+        Console.WriteLine($"Nothing to be hashec, nothing matches {searchPattern}");
+        return;
+      }
+
       int c = 0;
       var hashItems = new ConcurrentBag<HashItem>();
       Parallel.ForEach (imgPaths, path => {

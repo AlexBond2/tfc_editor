@@ -41,13 +41,15 @@ namespace PaladinsTfc
       this.textSelectDirectoryInput = new System.Windows.Forms.TextBox();
       this.labelSelectDirectoryOutput = new System.Windows.Forms.Label();
       this.btnSelectDirectoryOutput = new System.Windows.Forms.Button();
-      this.richTextLog = new System.Windows.Forms.RichTextBox();
+      this.rtextLog = new System.Windows.Forms.RichTextBox();
       this.textSelectDirectoryOutput = new System.Windows.Forms.TextBox();
       this.labelRun = new System.Windows.Forms.Label();
       this.btnOperationDuplicate = new System.Windows.Forms.Button();
       this.ddGrid = new System.Windows.Forms.DataGridView();
       this.labelLog = new System.Windows.Forms.Label();
       this.btnOperationDelete = new System.Windows.Forms.Button();
+      this.saveDialogOperations = new System.Windows.Forms.SaveFileDialog();
+      this.openDialogOperations = new System.Windows.Forms.OpenFileDialog();
       ((System.ComponentModel.ISupportInitialize)(this.ddGrid)).BeginInit();
       this.SuspendLayout();
       // 
@@ -100,6 +102,7 @@ namespace PaladinsTfc
       this.btnOperationSave.TabIndex = 14;
       this.btnOperationSave.Text = "Save Operations";
       this.btnOperationSave.UseVisualStyleBackColor = true;
+      this.btnOperationSave.Click += new System.EventHandler(this.btnOperationSave_Click);
       // 
       // labelOperations
       // 
@@ -120,6 +123,7 @@ namespace PaladinsTfc
       this.btnOperationLoad.TabIndex = 16;
       this.btnOperationLoad.Text = "Load Operations";
       this.btnOperationLoad.UseVisualStyleBackColor = true;
+      this.btnOperationLoad.Click += new System.EventHandler(this.btnOperationLoad_Click);
       // 
       // textSelectDirectoryInput
       // 
@@ -149,16 +153,17 @@ namespace PaladinsTfc
       this.btnSelectDirectoryOutput.UseVisualStyleBackColor = true;
       this.btnSelectDirectoryOutput.Click += new System.EventHandler(this.btnSelectDirectoryOutput_Click);
       // 
-      // richTextLog
+      // rtextLog
       // 
-      this.richTextLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.rtextLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-      this.richTextLog.Location = new System.Drawing.Point(12, 364);
-      this.richTextLog.Name = "richTextLog";
-      this.richTextLog.ReadOnly = true;
-      this.richTextLog.Size = new System.Drawing.Size(183, 290);
-      this.richTextLog.TabIndex = 21;
-      this.richTextLog.Text = "";
+      this.rtextLog.Location = new System.Drawing.Point(12, 364);
+      this.rtextLog.Name = "rtextLog";
+      this.rtextLog.ReadOnly = true;
+      this.rtextLog.Size = new System.Drawing.Size(183, 290);
+      this.rtextLog.TabIndex = 21;
+      this.rtextLog.Text = "";
+      this.rtextLog.WordWrap = false;
       // 
       // textSelectDirectoryOutput
       // 
@@ -225,10 +230,9 @@ namespace PaladinsTfc
       // 
       // Gui
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
       this.ClientSize = new System.Drawing.Size(1027, 710);
-      this.Controls.Add(this.richTextLog);
+      this.Controls.Add(this.rtextLog);
       this.Controls.Add(this.btnRun);
       this.Controls.Add(this.btnOperationAdd);
       this.Controls.Add(this.labelSelectDirectoryInput);
@@ -266,7 +270,7 @@ namespace PaladinsTfc
     private TextBox textSelectDirectoryInput;
     private Label labelSelectDirectoryOutput;
     private Button btnSelectDirectoryOutput;
-    private RichTextBox richTextLog;
+    private RichTextBox rtextLog;
     private TextBox textSelectDirectoryOutput;
     private Label labelRun;
     private Button btnOperationDuplicate;
@@ -275,5 +279,7 @@ namespace PaladinsTfc
     private Button btnOperationDelete;
     private CommonOpenFileDialog openFileDialogSelectDirectoryInput;
     private CommonOpenFileDialog openFileDialogSelectDirectoryOutput;
+    private SaveFileDialog saveDialogOperations;
+    private OpenFileDialog openDialogOperations;
   }
 }

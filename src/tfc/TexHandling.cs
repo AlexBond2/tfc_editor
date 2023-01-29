@@ -202,126 +202,152 @@ namespace PaladinsTfc
       int ddsH = 512;
 
       const int dxt1 = 0x31545844; //DXT1
-      const int dxt2 = 0x35545844; //DXT5
+      const int dxt5 = 0x35545844; //DXT5
 
-      if(tex.blocks.Count >= 1 && tex.blocks[0].originalSize >= 0x0800) { //if texture too small this switch statement does not work
-        Console.WriteLine(String.Format("Dumping Texture {0}", tex.id));
-
-        int ddsSize = tex.blocks[0].originalSize;
-        int ddsFormat = -1;
-        switch (tex.blocks.Count) {
-          case 2:
-            ddsW = 512;
-            ddsH = 512;
-            ddsSize = ddsW * ddsH;
-            ddsFormat = dxt2;
-            break;
-          case 4:
-            ddsW = 1024;
-            ddsH = 1024;
-            ddsSize = ddsW * ddsH / 2;
-            ddsFormat = dxt1;
-            break;
-          case 8:
-            ddsW = 1024;
-            ddsH = 1024;
-            ddsSize = ddsW * ddsH;
-            ddsFormat = dxt2;
-            break;
-          case 16:
-            ddsW = 2048;
-            ddsH = 2048;
-            ddsSize = ddsW * ddsH / 2;
-            ddsFormat = dxt1;
-            break;
-          default:
-            switch (ddsSize) {
-              case 0x0800:
-                ddsW = 64;
-                ddsH = 64;
-                ddsSize = ddsW * ddsH / 2;
-                ddsFormat = dxt1;
-                break;
-              case 0x1000:
-                ddsW = 64;
-                ddsH = 64;
-                ddsSize = ddsW * ddsH;
-                ddsFormat = dxt2;
-                break;
-              case 0x2000:
-                ddsW = 128;
-                ddsH = 128;
-                ddsSize = ddsW * ddsH / 2;
-                ddsFormat = dxt1;
-                break;
-              case 0x4000:
-                ddsW = 128;
-                ddsH = 128;
-                ddsSize = ddsW * ddsH;
-                ddsFormat = dxt2;
-                break;
-              case 0x8000:
-                ddsW = 256;
-                ddsH = 256;
-                ddsSize = ddsW * ddsH / 2;
-                ddsFormat = dxt1;
-                break;
-              case 0x10000 :
-                ddsW = 256;
-                ddsH = 256;
-                ddsSize = ddsW * ddsH;
-                ddsFormat = dxt2;
-                break;
-              case 0x20000:
-                ddsW = 512;
-                ddsH = 512;
-                ddsSize = ddsW * ddsH / 2;
-                ddsFormat = dxt1;
-                break;
-            }
-            break;
-        }
-        
-        string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT5";
-        string withoutExtension = Path.GetFileNameWithoutExtension(fileName);
-        string outPath = string.Format(GLOB_OutPath + "/dump/{0}_{1}_{2}x{3}.dds", 
-          withoutExtension, 
-          tex.id.ToString("d3"),
-          ddsW,
-          ddsFormatName
-        );
-        Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-        FileStream fsDump = new FileStream(outPath, FileMode.Create);
-        BinaryWriter bwDump = new BinaryWriter((Stream) fsDump);
-
-        // DDS spec: https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
-        // writing DDS header        
-        bwDump.Write(0x20534444); // dwMagic (constant to identify that this is a dds file)
-        bwDump.Write(0x7c);       // header
-        bwDump.Write(0x1007);     // header DX10
-        bwDump.Write(ddsH);
-        bwDump.Write(ddsW);
-        bwDump.Write(ddsSize);
-        bwDump.Write(0);
-        bwDump.Write(1);
-        fsDump.Seek(44L, SeekOrigin.Current);
-        bwDump.Write(32);
-        bwDump.Write(4);
-        bwDump.Write(ddsFormat);
-        fsDump.Seek(40L, SeekOrigin.Current);
-
-        for (int i = 0; i < tex.blocks.Count; ++i) {
-          TexBlock block = tex.blocks[i];
-
-          fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
-          
-          byte[] compressedTextureBlock = new byte[block.compressedSize];
-          fs.Read(compressedTextureBlock, 0, block.compressedSize);
-          byte[] buffer = lzo.Decompress(compressedTextureBlock, block.originalSize);
-          fsDump.Write(buffer, 0, buffer.Length);
-        }
-      } else {
+      if (tex.blocks.Count == 1 && tex.blocks[0].originalSize < 0x0800) {
         Console.WriteLine(String.Format("Texture {0} is too small, skipping", tex.id));
+        return;
+      }
+      if (tex.blocks.Count > 128) {
+        Console.WriteLine(String.Format("Texture {0} is too large, skipping", tex.id));
+        return;
+      }
+
+      Console.WriteLine(String.Format("Dumping Texture {0}", tex.id));
+
+      int ddsSize = tex.blocks[0].originalSize;
+      int ddsFormat = -1;
+      switch (tex.blocks.Count) {
+        case 2:
+          ddsW = 512;
+          ddsH = 512;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = dxt5;
+          break;
+        case 4:
+          ddsW = 1024;
+          ddsH = 1024;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = dxt1;
+          break;
+        case 8:
+          ddsW = 1024;
+          ddsH = 1024;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = dxt5;
+          break;
+        case 16:
+          ddsW = 2048;
+          ddsH = 2048;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = dxt1;
+          break;
+        case 32:
+          ddsW = 2048;
+          ddsH = 2048;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = dxt5;
+          break;
+        case 64:
+          ddsW = 4096;
+          ddsH = 4096;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = dxt1;
+          break;
+        case 128:
+          ddsW = 4096;
+          ddsH = 4096;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = dxt5;
+          break;
+        default:
+          switch (ddsSize) {
+            case 0x0800:
+              ddsW = 64;
+              ddsH = 64;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = dxt1;
+              break;
+            case 0x1000:
+              ddsW = 64;
+              ddsH = 64;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = dxt5;
+              break;
+            case 0x2000:
+              ddsW = 128;
+              ddsH = 128;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = dxt1;
+              break;
+            case 0x4000:
+              ddsW = 128;
+              ddsH = 128;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = dxt5;
+              break;
+            case 0x8000:
+              ddsW = 256;
+              ddsH = 256;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = dxt1;
+              break;
+            case 0x10000 :
+              ddsW = 256;
+              ddsH = 256;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = dxt5;
+              break;
+            case 0x20000:
+              ddsW = 512;
+              ddsH = 512;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = dxt1;
+              break;
+            default:
+              Console.WriteLine(String.Format("Texture {0} has non 2^x size, skipping", tex.id));
+              return;
+          }
+          break;
+      }
+        
+      string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT5";
+      string withoutExtension = Path.GetFileNameWithoutExtension(fileName);
+      string outPath = string.Format(GLOB_OutPath + "/dump/{0}_{1}_{2}x{3}.dds", 
+        withoutExtension, 
+        tex.id.ToString("d3"),
+        ddsW,
+        ddsFormatName
+      );
+      Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+      FileStream fsDump = new FileStream(outPath, FileMode.Create);
+      BinaryWriter bwDump = new BinaryWriter((Stream) fsDump);
+
+      // DDS spec: https://docs.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
+      // writing DDS header        
+      bwDump.Write(0x20534444); // dwMagic (constant to identify that this is a dds file)
+      bwDump.Write(0x7c);       // header
+      bwDump.Write(0x1007);     // header DX10
+      bwDump.Write(ddsH);
+      bwDump.Write(ddsW);
+      bwDump.Write(ddsSize);
+      bwDump.Write(0);
+      bwDump.Write(1);
+      fsDump.Seek(44L, SeekOrigin.Current);
+      bwDump.Write(32);
+      bwDump.Write(4);
+      bwDump.Write(ddsFormat);
+      fsDump.Seek(40L, SeekOrigin.Current);
+
+      for (int i = 0; i < tex.blocks.Count; ++i) {
+        TexBlock block = tex.blocks[i];
+
+        fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
+          
+        byte[] compressedTextureBlock = new byte[block.compressedSize];
+        fs.Read(compressedTextureBlock, 0, block.compressedSize);
+        byte[] buffer = lzo.Decompress(compressedTextureBlock, block.originalSize);
+        fsDump.Write(buffer, 0, buffer.Length);
       }
       GC.Collect();
     }
