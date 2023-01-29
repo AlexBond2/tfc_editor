@@ -507,6 +507,7 @@ namespace PaladinsTfc
       if(id2replacement!=null && id2replacement.Count() > 0){
         LZOCompressor lzo = new LZOCompressor(); // NEVER EVER EVER SHARE LZOCompressor from dump
         string outFile = GLOB_OutPath+ "/edited/" + Path.GetFileName(inFile);
+        Directory.CreateDirectory(Path.GetDirectoryName(outFile));
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
         foreach(KeyValuePair<int, string> kv in id2replacement){

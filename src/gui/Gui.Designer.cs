@@ -50,6 +50,7 @@ namespace PaladinsTfc
       this.btnOperationDelete = new System.Windows.Forms.Button();
       this.saveDialogOperations = new System.Windows.Forms.SaveFileDialog();
       this.openDialogOperations = new System.Windows.Forms.OpenFileDialog();
+      this.openFileDialogReplacementFile = new System.Windows.Forms.OpenFileDialog();
       ((System.ComponentModel.ISupportInitialize)(this.ddGrid)).BeginInit();
       this.SuspendLayout();
       // 
@@ -281,5 +282,6 @@ namespace PaladinsTfc
     private CommonOpenFileDialog openFileDialogSelectDirectoryOutput;
     private SaveFileDialog saveDialogOperations;
     private OpenFileDialog openDialogOperations;
+    private OpenFileDialog openFileDialogReplacementFile;
   }
 }

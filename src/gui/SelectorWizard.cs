@@ -706,7 +706,45 @@ namespace paladins_tfc.src.gui {
     }
 
     private void btnDumpPreviews_Click(object sender, EventArgs e) {
-      MessageBox.Show("Not implemented, for now you MUST have a full dump of all tfcs in order to see previews", "TODO");
+      var file2dumpids = new Dictionary<string, List<int>>();
+      foreach (ListViewItem item in listViewTFC.Items) {
+        HashInfo hi;
+        try {
+          hi = infoFromHashKey(item.Tag.ToString());
+        } catch {
+          MessageBox.Show($"{item.Tag} is not a valid id, this is probably a programming error, sorry", "Error");
+          return;
+        }
+        string file = hi.fileWithEnding;
+        string wholeFilePath = $"{persitantData.inputDirectory}/{file}" ;
+
+        if (file2dumpids.ContainsKey(wholeFilePath)) {
+          file2dumpids[wholeFilePath].Add(hi.id);
+        } else {
+          file2dumpids[wholeFilePath] = new List<int> {hi.id};
+        }
+      }
+
+      var terminalCommands = new List<List<string>>();
+      foreach (var kv in file2dumpids) {
+        string dumpids = string.Join(",", kv.Value);
+        terminalCommands.Add(new List<string>() {
+          "open", kv.Key, "--dump", dumpids, "--output-directory", persitantData.outputDirectory
+        });
+      }
+
+
+      
+
+      var callBack = new MethodInvoker(() => {
+        Extentions.invokeSomeway(this, new MethodInvoker(() => {
+          invalidateByImageSimilarity();
+        }));
+      });
+      parentGui.Focus();
+      Extentions.invokeSomeway(this.parentGui, new MethodInvoker(() => {
+        parentGui.runCommands(terminalCommands, callBack);
+      }));
     }
   }
 }

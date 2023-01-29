@@ -92,9 +92,9 @@ namespace PaladinsTfc
 
       Option compressionModeOption = new Option<string>(
         aliases: new string[] { "--compression-mode", "-m" },
-        description: "Compression mode\n tfc | zlib"
+        description: "Compression mode\n lzo | zlib"
       ); compressionModeOption.Arity = ArgumentArity.ExactlyOne;
-      compressionModeOption.SetDefaultValue("tfc");
+      compressionModeOption.SetDefaultValue("lzo");
 
       Command openCommand = new Command("open", "Parses tfc file and then does [options]") {
         openArgument, dumpOption, replaceOption, outDirectoryOption, compressionModeOption

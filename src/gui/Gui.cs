@@ -118,6 +118,9 @@ namespace PaladinsTfc {
       openFileDialogSelectDirectoryOutput.IsFolderPicker = true;
       openFileDialogSelectDirectoryOutput.RestoreDirectory = true;
       openFileDialogSelectDirectoryOutput.Title = "Select Output Directory";
+      openFileDialogReplacementFile.Title = "Select replacement dds files (of same resolution and encoding)";
+      openFileDialogReplacementFile.Filter = "dds files (*.dds)|*.dds";
+      openFileDialogReplacementFile.DefaultExt = "dds";
     }
 
     private void ddGrid_CellContentClick(object sender, DataGridViewCellEventArgs e) {
@@ -130,7 +133,15 @@ namespace PaladinsTfc {
           selectorWizard.Show(this);
         }
       } else if (e.ColumnIndex == colOfReplacementGenerator) {
-        MessageBox.Show("TODO", "Pick File");
+        if (openFileDialogReplacementFile.ShowDialog() == DialogResult.OK) {
+          var selectedSettingsRow = (SettingsRow)(ddGrid.Rows[e.RowIndex].DataBoundItem);
+          string currentDir = Environment.CurrentDirectory;
+          string selectedFile = openFileDialogReplacementFile.FileName;
+          Console.WriteLine($"{currentDir} -> {selectedFile}");
+          string relPath = Path.GetRelativePath(currentDir, selectedFile);
+          selectedSettingsRow.ReplacementPath = relPath;
+          invalidateGrid();
+        }
       }
       /*var editingControl = this.ddGrid.EditingControl as DataGridViewComboBoxEditingControl;
       if (editingControl != null)
@@ -219,7 +230,7 @@ namespace PaladinsTfc {
 
             string file;
             string selector;
-            string[] selSplit = op.Selector.Split("#");
+            string[] selSplit = op.Selector.Split(":");
             switch (selSplit.Length) {
               case 1:
                 file = selSplit[0];
@@ -251,24 +262,24 @@ namespace PaladinsTfc {
             return;
           }
           if (op.Selector == "*") {
-            runError($"Replace operations can only be applied to a singular texture#ids, Not {op.Selector}");
+            runError($"Replace operations can only be applied to a singular texture:id, Not {op.Selector}");
             return;
           }
 
           string file;
           string strSelector;
-          string[] selSplit = op.Selector.Split("#");
+          string[] selSplit = op.Selector.Split(":");
           switch (selSplit.Length) {
             case 2:
               file = selSplit[0];
               strSelector = selSplit[1];
               break;
             default:
-              runError($"Replace operations can only be applied to a singular texture#ids, Not {op.Selector}");
+              runError($"Replace operations can only be applied to a singular texture:id, Not {op.Selector}");
               return;
           }
           if (int.TryParse(strSelector, out int singularIntSelector) == false) {
-            runError($"Replace operations can only be applied to a singular texture#ids, Not {strSelector}");
+            runError($"Replace operations can only be applied to a singular texture:id, Not {strSelector}");
             return;
           }
           if (name2cliActions.ContainsKey(file) == false) {
@@ -375,13 +386,16 @@ namespace PaladinsTfc {
     }
 
     public void runCommands(List<List<string>> terminalCommands) {
+      runCommands(terminalCommands, new MethodInvoker(() => { return; }));
+    }
+    public void runCommands(List<List<string>> terminalCommands, MethodInvoker postDone) {
       string[] preview = terminalCommands.Select(args => $"{string.Join(" ", args)}").ToArray();
       var confirmDialog = new paladins_tfc.src.gui.ConfirmDialog(preview);
 
       DialogResult dr = confirmDialog.ShowDialog(this);
       if (dr == DialogResult.OK) {
         lockUI();
-        Thread commandThread = newCommandThread(this, terminalCommands);
+        Thread commandThread = newCommandThread(this, terminalCommands, postDone);
         commandThread.Start();
       }
     }
@@ -412,7 +426,7 @@ namespace PaladinsTfc {
       rtextLog.Text += s;
     }
 
-    private Thread newCommandThread(Control control, List<List<string>> terminalCommands) {
+    private Thread newCommandThread(Control control, List<List<string>> terminalCommands, MethodInvoker postDone) {
       return new Thread(
         new ThreadStart(() => {
           var oldBounds = rtextLog.Bounds;
@@ -446,6 +460,7 @@ namespace PaladinsTfc {
           Extentions.invokeSomeway(control, new MethodInvoker(() => {
             logWrite($"Unlocked UI\n");
           }));
+          postDone.Invoke();
         })
      );
     }
@@ -465,11 +480,13 @@ namespace PaladinsTfc {
     }
 
     private void btnOperationDelete_Click(object sender, EventArgs e) {
-      ddGrid.Rows.RemoveAt(ddGrid.CurrentRow.Index);
-      var rows = ddGrid.SelectedRows;
-      foreach (DataGridViewRow row in ddGrid.SelectedRows) {
-        ddGrid.Rows.RemoveAt(row.Index);
-      }
+      try {
+        ddGrid.Rows.RemoveAt(ddGrid.CurrentRow.Index);
+        var rows = ddGrid.SelectedRows;
+        foreach (DataGridViewRow row in ddGrid.SelectedRows) {
+          ddGrid.Rows.RemoveAt(row.Index);
+        }
+      } catch { }
     }
 
     private void btnOperationSave_Click(object sender, EventArgs e) {
