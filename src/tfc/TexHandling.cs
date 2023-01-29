@@ -1,4 +1,5 @@
 using Lzo64;
+using zlib;
 
 namespace PaladinsTfc
 {
@@ -15,6 +16,7 @@ namespace PaladinsTfc
     private static Dictionary<int,string> id2replacement;
 
     private static string GLOB_OutPath;
+    private static string compressionMode;
 
     public class TexBlock {
       public long loc_compressedSize;
@@ -341,18 +343,53 @@ namespace PaladinsTfc
 
       for (int i = 0; i < tex.blocks.Count; ++i) {
         TexBlock block = tex.blocks[i];
+        //Console.WriteLine($"Block {i}: [uncompsize={block.originalSize.ToString("x")}, compsize={block.compressedSize.ToString("x")}]");
 
         fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
           
         byte[] compressedTextureBlock = new byte[block.compressedSize];
         fs.Read(compressedTextureBlock, 0, block.compressedSize);
-        byte[] buffer = lzo.Decompress(compressedTextureBlock, block.originalSize);
-        fsDump.Write(buffer, 0, buffer.Length);
+        switch (compressionMode) {
+          case "lzo":
+            byte[] buffer = lzo.Decompress(compressedTextureBlock, block.originalSize);
+            fsDump.Write(buffer, 0, buffer.Length);
+            break;
+          case "zlib":
+            ZOutputStream zoutputStream = new ZOutputStream(fsDump);
+            zoutputStream.Write(compressedTextureBlock, 0, block.originalSize);
+            zoutputStream.Flush();
+            break;
+          default:
+            throw new Exception("Decompression failure, not lzo, zlib");
+        }
       }
       GC.Collect();
     }
 
-    private static void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, string replacementDDSPath) {
+    private static void dothelzx() {
+      Lzx.LzxDecoder lzx = new Lzx.LzxDecoder(17);
+    }
+      /*
+        mspack_file src, dst;
+        src.buf = CompressedBuffer;
+        src.bufSize = CompressedSize;
+        src.pos = 0;
+        src.rest = 0;
+        dst.buf = UncompressedBuffer;
+        dst.bufSize = UncompressedSize;
+        dst.pos = 0;
+        // prepare decompressor
+        lzxd_stream* lzxd = lzxd_init(&lzxSys, &src, &dst, 17, 0, 256 * 1024, UncompressedSize);
+        assert(lzxd);
+        // decompress
+        int r = lzxd_decompress(lzxd, UncompressedSize);
+        if (r != MSPACK_ERR_OK)
+          appError("lzxd_decompress(%d,%d) returned %d", CompressedSize, UncompressedSize, r);
+        // free resources
+        lzxd_free(lzxd);
+      }*/
+
+      private static void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, string replacementDDSPath) {
       Tex tex = tfcinfo.texs[id];
       if (tex.id != id)
         throw new Exception("RedundantDataException, tex id is wrong");
@@ -446,11 +483,13 @@ namespace PaladinsTfc
       string inFile, 
       string outDir, 
       Dictionary<int,string> 
-      arg_id2replacement, HashSet<int> 
-      arg_dumpRange
+      arg_id2replacement, 
+      HashSet<int> arg_dumpRange,
+      string arg_compressionMode
     ){
       id2replacement = arg_id2replacement;
       dumpRange = arg_dumpRange;
+      compressionMode = arg_compressionMode;
       GLOB_OutPath = outDir;
 
       TFCInfo tf = getTFCInfo(inFile);

@@ -88,19 +88,26 @@ namespace PaladinsTfc
         aliases: new string[] { "--output-directory", "-o" },
         description: "Directory to place dumps and/or tfc files.\n <path/to/folder>"
       ); outDirectoryOption.Arity = ArgumentArity.ExactlyOne;
-      outDirectoryOption.SetDefaultValue("./out");
+      outDirectoryOption.SetDefaultValue("./out"); 
+
+      Option compressionModeOption = new Option<string>(
+        aliases: new string[] { "--compression-mode", "-m" },
+        description: "Compression mode\n tfc | zlib"
+      ); compressionModeOption.Arity = ArgumentArity.ExactlyOne;
+      compressionModeOption.SetDefaultValue("tfc");
 
       Command openCommand = new Command("open", "Parses tfc file and then does [options]") {
-        openArgument, dumpOption, replaceOption, outDirectoryOption
+        openArgument, dumpOption, replaceOption, outDirectoryOption, compressionModeOption
       }; 
       
       var rootCommand = new RootCommand();
 
-      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, string directoryStr) => {
+      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, string directoryStr, string compressionMode) => {
         Console.WriteLine($"The value for inFile is: {inTfcFile}");
         Console.WriteLine($"The value for --dump is: {dumpRangeStr}");
         Console.WriteLine($"The value for --replace is: {replaceStr}");
         Console.WriteLine($"The value for --output-directory is: {directoryStr}");
+        Console.WriteLine($"The value for --compression-mode is: {compressionMode}");
 
         if (inTfcFile == null) {
           throw new ArgumentException("No file supplied");
@@ -110,8 +117,8 @@ namespace PaladinsTfc
         }
         Dictionary<int, string> id2replacement = getReplacements(replaceStr);
         HashSet<int> dumpRange = getDumpRange(dumpRangeStr);
-        TexHandling.run(inTfcFile, directoryStr, id2replacement, dumpRange);
-      }, openArgument, dumpOption, replaceOption, outDirectoryOption);
+        TexHandling.run(inTfcFile, directoryStr, id2replacement, dumpRange, compressionMode);
+      }, openArgument, dumpOption, replaceOption, outDirectoryOption, compressionModeOption);
       return openCommand;
     }
 

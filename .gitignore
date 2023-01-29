@@ -13,9 +13,9 @@ out/
 
 py/
 
-*.csproj.user
 *.sln
 *.dll
 Properties/
 paladins_tfc.csproj.user
 
+configuration.json
