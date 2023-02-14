@@ -53,45 +53,37 @@ namespace paladins_tfc.src.gui
       this.textPreviewFilenameAndId = new System.Windows.Forms.TextBox();
       this.btnSubmitFileNameAndId = new System.Windows.Forms.Button();
       this.byImageSimilarity = new System.Windows.Forms.TabPage();
+      this.checkFileName = new System.Windows.Forms.CheckBox();
+      this.checkCookedImage = new System.Windows.Forms.CheckBox();
+      this.checkResolution = new System.Windows.Forms.CheckBox();
       this.btnDumpPreviews = new System.Windows.Forms.Button();
       this.listViewTFC = new System.Windows.Forms.ListView();
-      this.checkFileName = new System.Windows.Forms.CheckBox();
       this.groupFileName = new System.Windows.Forms.GroupBox();
       this.textNameIncludeFilter = new System.Windows.Forms.TextBox();
       this.textNameExcludeFilter = new System.Windows.Forms.TextBox();
       this.label6 = new System.Windows.Forms.Label();
       this.label5 = new System.Windows.Forms.Label();
-      this.checkResolution = new System.Windows.Forms.CheckBox();
-      this.checkCookedImage = new System.Windows.Forms.CheckBox();
       this.groupResolution = new System.Windows.Forms.GroupBox();
       this.numericFilterResolution = new System.Windows.Forms.NumericUpDown();
       this.sliderFilterResolution = new System.Windows.Forms.TrackBar();
       this.groupCookedImage = new System.Windows.Forms.GroupBox();
       this.label4 = new System.Windows.Forms.Label();
       this.numericNoCandidates = new System.Windows.Forms.NumericUpDown();
-      this.pictureCooked = new System.Windows.Forms.PictureBox();
+      this.pictureImgFilter = new System.Windows.Forms.PictureBox();
       this.btnCookedFilterBrowse = new System.Windows.Forms.Button();
-      this.textCookedFilter = new System.Windows.Forms.TextBox();
+      this.textImageFilter = new System.Windows.Forms.TextBox();
       this.label3 = new System.Windows.Forms.Label();
       this.labelCandidates = new System.Windows.Forms.Label();
-      this.labelSelectFileHashCooked = new System.Windows.Forms.Label();
-      this.textSelectFileHashCooked = new System.Windows.Forms.TextBox();
-      this.btnSelectFileHashCooked = new System.Windows.Forms.Button();
-      this.btnGenerateHashCooked = new System.Windows.Forms.Button();
       this.labelSelectFileHashTFC = new System.Windows.Forms.Label();
       this.btnGenerateHashTFC = new System.Windows.Forms.Button();
       this.textSelectFileHashTFC = new System.Windows.Forms.TextBox();
       this.btnSelectFileHashTFC = new System.Windows.Forms.Button();
-      this.labelSelectDirectoryCookedReference = new System.Windows.Forms.Label();
-      this.textSelectDirectoryCookedReference = new System.Windows.Forms.TextBox();
-      this.btnSelectDirectoryCookedReference = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this.textPreviewImageSimilarity = new System.Windows.Forms.TextBox();
       this.btnSubmitImageSimilarity = new System.Windows.Forms.Button();
-      this.openFileDialogSelectFileHashCooked = new System.Windows.Forms.OpenFileDialog();
       this.openFileDialogSelectFileHashTFC = new System.Windows.Forms.OpenFileDialog();
       this.imgListTFC = new System.Windows.Forms.ImageList(this.components);
-      this.openFileDialogCookedFilter = new System.Windows.Forms.OpenFileDialog();
+      this.openFileDialogImgFilter = new System.Windows.Forms.OpenFileDialog();
       this.tabControl1.SuspendLayout();
       this.all.SuspendLayout();
       this.filename.SuspendLayout();
@@ -103,7 +95,7 @@ namespace paladins_tfc.src.gui
       ((System.ComponentModel.ISupportInitialize)(this.sliderFilterResolution)).BeginInit();
       this.groupCookedImage.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericNoCandidates)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureCooked)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.pictureImgFilter)).BeginInit();
       this.SuspendLayout();
       // 
       // btnSubmitAll
@@ -328,27 +320,20 @@ namespace paladins_tfc.src.gui
       // 
       // byImageSimilarity
       // 
+      this.byImageSimilarity.Controls.Add(this.checkFileName);
+      this.byImageSimilarity.Controls.Add(this.checkCookedImage);
+      this.byImageSimilarity.Controls.Add(this.checkResolution);
       this.byImageSimilarity.Controls.Add(this.btnDumpPreviews);
       this.byImageSimilarity.Controls.Add(this.listViewTFC);
-      this.byImageSimilarity.Controls.Add(this.checkFileName);
       this.byImageSimilarity.Controls.Add(this.groupFileName);
-      this.byImageSimilarity.Controls.Add(this.checkResolution);
-      this.byImageSimilarity.Controls.Add(this.checkCookedImage);
       this.byImageSimilarity.Controls.Add(this.groupResolution);
       this.byImageSimilarity.Controls.Add(this.groupCookedImage);
       this.byImageSimilarity.Controls.Add(this.label3);
       this.byImageSimilarity.Controls.Add(this.labelCandidates);
-      this.byImageSimilarity.Controls.Add(this.labelSelectFileHashCooked);
-      this.byImageSimilarity.Controls.Add(this.textSelectFileHashCooked);
-      this.byImageSimilarity.Controls.Add(this.btnSelectFileHashCooked);
-      this.byImageSimilarity.Controls.Add(this.btnGenerateHashCooked);
       this.byImageSimilarity.Controls.Add(this.labelSelectFileHashTFC);
       this.byImageSimilarity.Controls.Add(this.btnGenerateHashTFC);
       this.byImageSimilarity.Controls.Add(this.textSelectFileHashTFC);
       this.byImageSimilarity.Controls.Add(this.btnSelectFileHashTFC);
-      this.byImageSimilarity.Controls.Add(this.labelSelectDirectoryCookedReference);
-      this.byImageSimilarity.Controls.Add(this.textSelectDirectoryCookedReference);
-      this.byImageSimilarity.Controls.Add(this.btnSelectDirectoryCookedReference);
       this.byImageSimilarity.Controls.Add(this.label2);
       this.byImageSimilarity.Controls.Add(this.textPreviewImageSimilarity);
       this.byImageSimilarity.Controls.Add(this.btnSubmitImageSimilarity);
@@ -360,11 +345,44 @@ namespace paladins_tfc.src.gui
       this.byImageSimilarity.UseVisualStyleBackColor = true;
       this.byImageSimilarity.Enter += new System.EventHandler(this.byImageSimilarity_Enter);
       // 
+      // checkFileName
+      // 
+      this.checkFileName.AutoSize = true;
+      this.checkFileName.Location = new System.Drawing.Point(8, 382);
+      this.checkFileName.Name = "checkFileName";
+      this.checkFileName.Size = new System.Drawing.Size(15, 14);
+      this.checkFileName.TabIndex = 58;
+      this.checkFileName.UseVisualStyleBackColor = true;
+      this.checkFileName.CheckedChanged += new System.EventHandler(this.checkFileName_CheckedChanged);
+      // 
+      // checkCookedImage
+      // 
+      this.checkCookedImage.AutoSize = true;
+      this.checkCookedImage.Checked = true;
+      this.checkCookedImage.CheckState = System.Windows.Forms.CheckState.Checked;
+      this.checkCookedImage.Enabled = false;
+      this.checkCookedImage.Location = new System.Drawing.Point(8, 82);
+      this.checkCookedImage.Name = "checkCookedImage";
+      this.checkCookedImage.Size = new System.Drawing.Size(15, 14);
+      this.checkCookedImage.TabIndex = 55;
+      this.checkCookedImage.UseVisualStyleBackColor = true;
+      this.checkCookedImage.CheckedChanged += new System.EventHandler(this.checkCookedImage_CheckedChanged);
+      // 
+      // checkResolution
+      // 
+      this.checkResolution.AutoSize = true;
+      this.checkResolution.Location = new System.Drawing.Point(8, 272);
+      this.checkResolution.Name = "checkResolution";
+      this.checkResolution.Size = new System.Drawing.Size(15, 14);
+      this.checkResolution.TabIndex = 56;
+      this.checkResolution.UseVisualStyleBackColor = true;
+      this.checkResolution.CheckedChanged += new System.EventHandler(this.checkResolution_CheckedChanged);
+      // 
       // btnDumpPreviews
       // 
       this.btnDumpPreviews.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.btnDumpPreviews.BackColor = System.Drawing.Color.LightGray;
-      this.btnDumpPreviews.Location = new System.Drawing.Point(618, 109);
+      this.btnDumpPreviews.Location = new System.Drawing.Point(618, 50);
       this.btnDumpPreviews.Name = "btnDumpPreviews";
       this.btnDumpPreviews.Size = new System.Drawing.Size(128, 23);
       this.btnDumpPreviews.TabIndex = 60;
@@ -378,22 +396,12 @@ namespace paladins_tfc.src.gui
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.listViewTFC.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-      this.listViewTFC.Location = new System.Drawing.Point(226, 131);
+      this.listViewTFC.Location = new System.Drawing.Point(226, 72);
       this.listViewTFC.Name = "listViewTFC";
-      this.listViewTFC.Size = new System.Drawing.Size(520, 417);
+      this.listViewTFC.Size = new System.Drawing.Size(520, 476);
       this.listViewTFC.TabIndex = 46;
       this.listViewTFC.UseCompatibleStateImageBehavior = false;
       this.listViewTFC.SelectedIndexChanged += new System.EventHandler(this.listViewTFC_SelectedIndexChanged);
-      // 
-      // checkFileName
-      // 
-      this.checkFileName.AutoSize = true;
-      this.checkFileName.Location = new System.Drawing.Point(10, 426);
-      this.checkFileName.Name = "checkFileName";
-      this.checkFileName.Size = new System.Drawing.Size(15, 14);
-      this.checkFileName.TabIndex = 58;
-      this.checkFileName.UseVisualStyleBackColor = true;
-      this.checkFileName.CheckedChanged += new System.EventHandler(this.checkFileName_CheckedChanged);
       // 
       // groupFileName
       // 
@@ -402,7 +410,7 @@ namespace paladins_tfc.src.gui
       this.groupFileName.Controls.Add(this.label6);
       this.groupFileName.Controls.Add(this.label5);
       this.groupFileName.Enabled = false;
-      this.groupFileName.Location = new System.Drawing.Point(6, 424);
+      this.groupFileName.Location = new System.Drawing.Point(6, 381);
       this.groupFileName.Name = "groupFileName";
       this.groupFileName.Size = new System.Drawing.Size(214, 124);
       this.groupFileName.TabIndex = 57;
@@ -445,35 +453,12 @@ namespace paladins_tfc.src.gui
       this.label5.TabIndex = 0;
       this.label5.Text = "Only Include TFC Names Containing:";
       // 
-      // checkResolution
-      // 
-      this.checkResolution.AutoSize = true;
-      this.checkResolution.Location = new System.Drawing.Point(10, 316);
-      this.checkResolution.Name = "checkResolution";
-      this.checkResolution.Size = new System.Drawing.Size(15, 14);
-      this.checkResolution.TabIndex = 56;
-      this.checkResolution.UseVisualStyleBackColor = true;
-      this.checkResolution.CheckedChanged += new System.EventHandler(this.checkResolution_CheckedChanged);
-      // 
-      // checkCookedImage
-      // 
-      this.checkCookedImage.AutoSize = true;
-      this.checkCookedImage.Checked = true;
-      this.checkCookedImage.CheckState = System.Windows.Forms.CheckState.Checked;
-      this.checkCookedImage.Enabled = false;
-      this.checkCookedImage.Location = new System.Drawing.Point(10, 126);
-      this.checkCookedImage.Name = "checkCookedImage";
-      this.checkCookedImage.Size = new System.Drawing.Size(15, 14);
-      this.checkCookedImage.TabIndex = 55;
-      this.checkCookedImage.UseVisualStyleBackColor = true;
-      this.checkCookedImage.CheckedChanged += new System.EventHandler(this.checkCookedImage_CheckedChanged);
-      // 
       // groupResolution
       // 
       this.groupResolution.Controls.Add(this.numericFilterResolution);
       this.groupResolution.Controls.Add(this.sliderFilterResolution);
       this.groupResolution.Enabled = false;
-      this.groupResolution.Location = new System.Drawing.Point(6, 314);
+      this.groupResolution.Location = new System.Drawing.Point(6, 271);
       this.groupResolution.Name = "groupResolution";
       this.groupResolution.Size = new System.Drawing.Size(214, 104);
       this.groupResolution.TabIndex = 54;
@@ -517,15 +502,15 @@ namespace paladins_tfc.src.gui
       // 
       this.groupCookedImage.Controls.Add(this.label4);
       this.groupCookedImage.Controls.Add(this.numericNoCandidates);
-      this.groupCookedImage.Controls.Add(this.pictureCooked);
+      this.groupCookedImage.Controls.Add(this.pictureImgFilter);
       this.groupCookedImage.Controls.Add(this.btnCookedFilterBrowse);
-      this.groupCookedImage.Controls.Add(this.textCookedFilter);
-      this.groupCookedImage.Location = new System.Drawing.Point(6, 124);
+      this.groupCookedImage.Controls.Add(this.textImageFilter);
+      this.groupCookedImage.Location = new System.Drawing.Point(6, 81);
       this.groupCookedImage.Name = "groupCookedImage";
       this.groupCookedImage.Size = new System.Drawing.Size(214, 184);
       this.groupCookedImage.TabIndex = 53;
       this.groupCookedImage.TabStop = false;
-      this.groupCookedImage.Text = "    Cooked Image";
+      this.groupCookedImage.Text = "    Image";
       // 
       // label4
       // 
@@ -559,14 +544,14 @@ namespace paladins_tfc.src.gui
             0});
       this.numericNoCandidates.ValueChanged += new System.EventHandler(this.numericNoCandidates_ValueChanged);
       // 
-      // pictureCooked
+      // pictureImgFilter
       // 
-      this.pictureCooked.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-      this.pictureCooked.Location = new System.Drawing.Point(79, 22);
-      this.pictureCooked.Name = "pictureCooked";
-      this.pictureCooked.Size = new System.Drawing.Size(128, 128);
-      this.pictureCooked.TabIndex = 48;
-      this.pictureCooked.TabStop = false;
+      this.pictureImgFilter.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+      this.pictureImgFilter.Location = new System.Drawing.Point(79, 22);
+      this.pictureImgFilter.Name = "pictureImgFilter";
+      this.pictureImgFilter.Size = new System.Drawing.Size(128, 128);
+      this.pictureImgFilter.TabIndex = 48;
+      this.pictureImgFilter.TabStop = false;
       // 
       // btnCookedFilterBrowse
       // 
@@ -578,18 +563,18 @@ namespace paladins_tfc.src.gui
       this.btnCookedFilterBrowse.UseVisualStyleBackColor = true;
       this.btnCookedFilterBrowse.Click += new System.EventHandler(this.btnCookedFilterBrowse_Click);
       // 
-      // textCookedFilter
+      // textImageFilter
       // 
-      this.textCookedFilter.Location = new System.Drawing.Point(6, 155);
-      this.textCookedFilter.Name = "textCookedFilter";
-      this.textCookedFilter.ReadOnly = true;
-      this.textCookedFilter.Size = new System.Drawing.Size(201, 23);
-      this.textCookedFilter.TabIndex = 51;
+      this.textImageFilter.Location = new System.Drawing.Point(6, 155);
+      this.textImageFilter.Name = "textImageFilter";
+      this.textImageFilter.ReadOnly = true;
+      this.textImageFilter.Size = new System.Drawing.Size(201, 23);
+      this.textImageFilter.TabIndex = 51;
       // 
       // label3
       // 
       this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(6, 106);
+      this.label3.Location = new System.Drawing.Point(6, 63);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(38, 15);
       this.label3.TabIndex = 47;
@@ -598,55 +583,16 @@ namespace paladins_tfc.src.gui
       // labelCandidates
       // 
       this.labelCandidates.AutoSize = true;
-      this.labelCandidates.Location = new System.Drawing.Point(226, 114);
+      this.labelCandidates.Location = new System.Drawing.Point(226, 54);
       this.labelCandidates.Name = "labelCandidates";
       this.labelCandidates.Size = new System.Drawing.Size(66, 15);
       this.labelCandidates.TabIndex = 45;
       this.labelCandidates.Text = "Candidates";
       // 
-      // labelSelectFileHashCooked
-      // 
-      this.labelSelectFileHashCooked.AutoSize = true;
-      this.labelSelectFileHashCooked.Location = new System.Drawing.Point(130, 24);
-      this.labelSelectFileHashCooked.Name = "labelSelectFileHashCooked";
-      this.labelSelectFileHashCooked.Size = new System.Drawing.Size(89, 15);
-      this.labelSelectFileHashCooked.TabIndex = 37;
-      this.labelSelectFileHashCooked.Text = "Cooked Hashes";
-      this.labelSelectFileHashCooked.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-      // 
-      // textSelectFileHashCooked
-      // 
-      this.textSelectFileHashCooked.Location = new System.Drawing.Point(226, 21);
-      this.textSelectFileHashCooked.Name = "textSelectFileHashCooked";
-      this.textSelectFileHashCooked.ReadOnly = true;
-      this.textSelectFileHashCooked.RightToLeft = System.Windows.Forms.RightToLeft.No;
-      this.textSelectFileHashCooked.Size = new System.Drawing.Size(226, 23);
-      this.textSelectFileHashCooked.TabIndex = 34;
-      // 
-      // btnSelectFileHashCooked
-      // 
-      this.btnSelectFileHashCooked.Location = new System.Drawing.Point(458, 20);
-      this.btnSelectFileHashCooked.Name = "btnSelectFileHashCooked";
-      this.btnSelectFileHashCooked.Size = new System.Drawing.Size(93, 23);
-      this.btnSelectFileHashCooked.TabIndex = 39;
-      this.btnSelectFileHashCooked.Text = "Select File";
-      this.btnSelectFileHashCooked.UseVisualStyleBackColor = true;
-      this.btnSelectFileHashCooked.Click += new System.EventHandler(this.btnSelectFileHashCooked_Click);
-      // 
-      // btnGenerateHashCooked
-      // 
-      this.btnGenerateHashCooked.Location = new System.Drawing.Point(557, 20);
-      this.btnGenerateHashCooked.Name = "btnGenerateHashCooked";
-      this.btnGenerateHashCooked.Size = new System.Drawing.Size(170, 23);
-      this.btnGenerateHashCooked.TabIndex = 35;
-      this.btnGenerateHashCooked.Text = "Generate Cooked Hashes";
-      this.btnGenerateHashCooked.UseVisualStyleBackColor = true;
-      this.btnGenerateHashCooked.Click += new System.EventHandler(this.btnGenerateHashCooked_Click);
-      // 
       // labelSelectFileHashTFC
       // 
       this.labelSelectFileHashTFC.AutoSize = true;
-      this.labelSelectFileHashTFC.Location = new System.Drawing.Point(152, 53);
+      this.labelSelectFileHashTFC.Location = new System.Drawing.Point(152, 24);
       this.labelSelectFileHashTFC.Name = "labelSelectFileHashTFC";
       this.labelSelectFileHashTFC.Size = new System.Drawing.Size(68, 15);
       this.labelSelectFileHashTFC.TabIndex = 40;
@@ -655,7 +601,7 @@ namespace paladins_tfc.src.gui
       // 
       // btnGenerateHashTFC
       // 
-      this.btnGenerateHashTFC.Location = new System.Drawing.Point(557, 50);
+      this.btnGenerateHashTFC.Location = new System.Drawing.Point(557, 21);
       this.btnGenerateHashTFC.Name = "btnGenerateHashTFC";
       this.btnGenerateHashTFC.Size = new System.Drawing.Size(170, 23);
       this.btnGenerateHashTFC.TabIndex = 41;
@@ -665,7 +611,7 @@ namespace paladins_tfc.src.gui
       // 
       // textSelectFileHashTFC
       // 
-      this.textSelectFileHashTFC.Location = new System.Drawing.Point(226, 50);
+      this.textSelectFileHashTFC.Location = new System.Drawing.Point(226, 21);
       this.textSelectFileHashTFC.Name = "textSelectFileHashTFC";
       this.textSelectFileHashTFC.ReadOnly = true;
       this.textSelectFileHashTFC.Size = new System.Drawing.Size(226, 23);
@@ -673,7 +619,7 @@ namespace paladins_tfc.src.gui
       // 
       // btnSelectFileHashTFC
       // 
-      this.btnSelectFileHashTFC.Location = new System.Drawing.Point(458, 49);
+      this.btnSelectFileHashTFC.Location = new System.Drawing.Point(458, 20);
       this.btnSelectFileHashTFC.Name = "btnSelectFileHashTFC";
       this.btnSelectFileHashTFC.Size = new System.Drawing.Size(93, 23);
       this.btnSelectFileHashTFC.TabIndex = 36;
@@ -681,51 +627,23 @@ namespace paladins_tfc.src.gui
       this.btnSelectFileHashTFC.UseVisualStyleBackColor = true;
       this.btnSelectFileHashTFC.Click += new System.EventHandler(this.btnSelectFileHashTFC_Click);
       // 
-      // labelSelectDirectoryCookedReference
-      // 
-      this.labelSelectDirectoryCookedReference.AutoSize = true;
-      this.labelSelectDirectoryCookedReference.Location = new System.Drawing.Point(66, 82);
-      this.labelSelectDirectoryCookedReference.Name = "labelSelectDirectoryCookedReference";
-      this.labelSelectDirectoryCookedReference.Size = new System.Drawing.Size(154, 15);
-      this.labelSelectDirectoryCookedReference.TabIndex = 44;
-      this.labelSelectDirectoryCookedReference.Text = "Cooked Reference Directory";
-      this.labelSelectDirectoryCookedReference.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-      // 
-      // textSelectDirectoryCookedReference
-      // 
-      this.textSelectDirectoryCookedReference.Location = new System.Drawing.Point(226, 79);
-      this.textSelectDirectoryCookedReference.Name = "textSelectDirectoryCookedReference";
-      this.textSelectDirectoryCookedReference.ReadOnly = true;
-      this.textSelectDirectoryCookedReference.Size = new System.Drawing.Size(226, 23);
-      this.textSelectDirectoryCookedReference.TabIndex = 43;
-      // 
-      // btnSelectDirectoryCookedReference
-      // 
-      this.btnSelectDirectoryCookedReference.Location = new System.Drawing.Point(458, 78);
-      this.btnSelectDirectoryCookedReference.Name = "btnSelectDirectoryCookedReference";
-      this.btnSelectDirectoryCookedReference.Size = new System.Drawing.Size(93, 23);
-      this.btnSelectDirectoryCookedReference.TabIndex = 42;
-      this.btnSelectDirectoryCookedReference.Text = "Select Folder";
-      this.btnSelectDirectoryCookedReference.UseVisualStyleBackColor = true;
-      this.btnSelectDirectoryCookedReference.Click += new System.EventHandler(this.btnSelectDirectoryCookedReference_Click);
-      // 
       // label2
       // 
       this.label2.AutoSize = true;
       this.label2.Location = new System.Drawing.Point(6, 3);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(403, 15);
+      this.label2.Size = new System.Drawing.Size(224, 15);
       this.label2.TabIndex = 12;
-      this.label2.Text = "Finds the TFC selector based off a Cooked Texture (as Extracted by UModel)";
+      this.label2.Text = "Finds the TFC selector based off a Texture";
       // 
       // textPreviewImageSimilarity
       // 
       this.textPreviewImageSimilarity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.textPreviewImageSimilarity.Location = new System.Drawing.Point(6, 554);
+      this.textPreviewImageSimilarity.Location = new System.Drawing.Point(3, 554);
       this.textPreviewImageSimilarity.Name = "textPreviewImageSimilarity";
       this.textPreviewImageSimilarity.ReadOnly = true;
-      this.textPreviewImageSimilarity.Size = new System.Drawing.Size(633, 23);
+      this.textPreviewImageSimilarity.Size = new System.Drawing.Size(636, 23);
       this.textPreviewImageSimilarity.TabIndex = 10;
       // 
       // btnSubmitImageSimilarity
@@ -735,16 +653,9 @@ namespace paladins_tfc.src.gui
       this.btnSubmitImageSimilarity.Name = "btnSubmitImageSimilarity";
       this.btnSubmitImageSimilarity.Size = new System.Drawing.Size(101, 23);
       this.btnSubmitImageSimilarity.TabIndex = 11;
-      this.btnSubmitImageSimilarity.Text = "Create Filter";
+      this.btnSubmitImageSimilarity.Text = "Create Filter(s)";
       this.btnSubmitImageSimilarity.UseVisualStyleBackColor = true;
       this.btnSubmitImageSimilarity.Click += new System.EventHandler(this.btnSubmitImageSimilarity_Click);
-      // 
-      // openFileDialogSelectFileHashCooked
-      // 
-      this.openFileDialogSelectFileHashCooked.DefaultExt = "json";
-      this.openFileDialogSelectFileHashCooked.Filter = "json files (*.json)|*.json";
-      this.openFileDialogSelectFileHashCooked.RestoreDirectory = true;
-      this.openFileDialogSelectFileHashCooked.Title = "Select Cooked Hashes Json File";
       // 
       // openFileDialogSelectFileHashTFC
       // 
@@ -758,12 +669,12 @@ namespace paladins_tfc.src.gui
       this.imgListTFC.ImageSize = new System.Drawing.Size(16, 16);
       this.imgListTFC.TransparentColor = System.Drawing.Color.Transparent;
       // 
-      // openFileDialogCookedFilter
+      // openFileDialogImgFilter
       // 
-      this.openFileDialogCookedFilter.DefaultExt = "png";
-      this.openFileDialogCookedFilter.Filter = "png files (*.png)|*.png";
-      this.openFileDialogCookedFilter.RestoreDirectory = true;
-      this.openFileDialogCookedFilter.Title = "Select Cooked Image Png";
+      this.openFileDialogImgFilter.DefaultExt = "png";
+      this.openFileDialogImgFilter.Filter = "png files (*.png)|*.png";
+      this.openFileDialogImgFilter.RestoreDirectory = true;
+      this.openFileDialogImgFilter.Title = "Select Cooked Image Png";
       // 
       // SelectorWizard
       // 
@@ -792,7 +703,7 @@ namespace paladins_tfc.src.gui
       this.groupCookedImage.ResumeLayout(false);
       this.groupCookedImage.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numericNoCandidates)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this.pictureCooked)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.pictureImgFilter)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -822,18 +733,10 @@ namespace paladins_tfc.src.gui
     private Label labelFilenameAndIdName;
     private Label labelFilenameAndIdHeader;
     private Label label2;
-    private Label labelSelectFileHashCooked;
-    private TextBox textSelectFileHashCooked;
-    private Button btnSelectFileHashCooked;
-    private Button btnGenerateHashCooked;
     private Label labelSelectFileHashTFC;
     private Button btnGenerateHashTFC;
     private TextBox textSelectFileHashTFC;
     private Button btnSelectFileHashTFC;
-    private Label labelSelectDirectoryCookedReference;
-    private TextBox textSelectDirectoryCookedReference;
-    private Button btnSelectDirectoryCookedReference;
-    private OpenFileDialog openFileDialogSelectFileHashCooked;
     private OpenFileDialog openFileDialogSelectFileHashTFC;
     private CommonOpenFileDialog openFileDialogSelectDirectoryCookedReference;
     private Label label3;
@@ -843,15 +746,15 @@ namespace paladins_tfc.src.gui
     private GroupBox groupResolution;
     private TrackBar sliderFilterResolution;
     private GroupBox groupCookedImage;
-    private PictureBox pictureCooked;
+    private PictureBox pictureImgFilter;
     private Button btnCookedFilterBrowse;
-    private TextBox textCookedFilter;
+    private TextBox textImageFilter;
     private CheckBox checkResolution;
     private CheckBox checkCookedImage;
     private NumericUpDown numericFilterResolution;
     private CheckBox checkFileName;
     private GroupBox groupFileName;
-    private OpenFileDialog openFileDialogCookedFilter;
+    private OpenFileDialog openFileDialogImgFilter;
     private Button btnDumpPreviews;
     private Label label4;
     private NumericUpDown numericNoCandidates;

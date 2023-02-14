@@ -204,7 +204,7 @@ namespace PaladinsTfc
       this.ddGrid.Location = new System.Drawing.Point(202, 70);
       this.ddGrid.Name = "ddGrid";
       this.ddGrid.RowTemplate.Height = 25;
-      this.ddGrid.Size = new System.Drawing.Size(813, 628);
+      this.ddGrid.Size = new System.Drawing.Size(953, 628);
       this.ddGrid.TabIndex = 28;
       this.ddGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ddGrid_CellContentClick);
       // 
@@ -232,7 +232,7 @@ namespace PaladinsTfc
       // Gui
       // 
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-      this.ClientSize = new System.Drawing.Size(1027, 710);
+      this.ClientSize = new System.Drawing.Size(1167, 710);
       this.Controls.Add(this.rtextLog);
       this.Controls.Add(this.btnRun);
       this.Controls.Add(this.btnOperationAdd);

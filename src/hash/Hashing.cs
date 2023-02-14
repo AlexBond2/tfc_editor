@@ -25,6 +25,17 @@ namespace PaladinsTfc
       }
     }  
 
+    public static ImgType imgTypeFromString(string s) {
+      switch (s.ToUpper()) {
+        case "PNG":
+          return ImgType.PNG;
+        case "DDS":
+          return ImgType.DDS;
+        default:
+          throw new ArgumentException($".{s} can't be opened (can only open dds and png files)");
+      }
+    }
+
     public static void hashDir(string dirpath, ImgType imgType, string outpath, string filter) {
       string typeName;
 
@@ -32,7 +43,7 @@ namespace PaladinsTfc
         typeName = "png";
       } else if (imgType == ImgType.DDS) {
         typeName = "dds";
-      } else throw new Exception("can only open dds and png files");
+      } else throw new ArgumentException("can only open dds and png files");
 
       Regex rx = new Regex(@"[^a-zA-Z0-9_\-]",RegexOptions.Compiled | RegexOptions.IgnoreCase);
       //string dirpathSafe = "TextureHashes_"+rx.Replace(dirpath, "_");
@@ -66,22 +77,22 @@ namespace PaladinsTfc
       System.IO.Directory.CreateDirectory(Path.GetDirectoryName(outFile));
       File.WriteAllText(outFile, jsData);
     }
-    public static Img.Image<Img.PixelFormats.Rgba32> getImg(string path, ImgType imgType) {
+    public static Img.Image<Img.PixelFormats.Rgba32>? getImg(string path, ImgType imgType) {
       if (imgType == ImgType.PNG){
         return Img.Image.Load<Img.PixelFormats.Rgba32>(path);
       } else if (imgType == ImgType.DDS) {
-        var tempPng = Path.ChangeExtension(path, ".png"); 
+        MemoryStream pngStream = new MemoryStream();
         using (var image = Pfimage.FromFile(path)) {
           var handle = GCHandle.Alloc(image.Data, GCHandleType.Pinned); 
           try {
             var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
             var bitmap = new Bitmap(image.Width, image.Height, image.Stride, PixelFormat.Format32bppArgb, data);
-            bitmap.Save(tempPng, System.Drawing.Imaging.ImageFormat.Png);
+            bitmap.Save(pngStream, System.Drawing.Imaging.ImageFormat.Png);
           } finally {
             handle.Free();
           }
-          var img = Img.Image.Load<Img.PixelFormats.Rgba32>(tempPng);
-          File.Delete(tempPng);
+          var img = Img.Image.Load<Img.PixelFormats.Rgba32>(pngStream);
+          pngStream.Close();
           return img;
         }
       }

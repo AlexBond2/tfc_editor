@@ -73,7 +73,7 @@ namespace PaladinsTfc {
       ddcolReplacement.HeaderText = "Replacement";
       ddcolReplacement.DataPropertyName = "ReplacementPath";
       ddcolReplacement.DisplayIndex = 5;
-      ddcolReplacement.Width = 250;
+      ddcolReplacement.Width = 450;
 
       DataGridViewButtonColumn ddcolReplacementGenerate = new DataGridViewButtonColumn();
       ddcolReplacementGenerate.HeaderText = "";
@@ -118,9 +118,9 @@ namespace PaladinsTfc {
       openFileDialogSelectDirectoryOutput.IsFolderPicker = true;
       openFileDialogSelectDirectoryOutput.RestoreDirectory = true;
       openFileDialogSelectDirectoryOutput.Title = "Select Output Directory";
-      openFileDialogReplacementFile.Title = "Select replacement dds files (of same resolution and encoding)";
-      openFileDialogReplacementFile.Filter = "dds files (*.dds)|*.dds";
-      openFileDialogReplacementFile.DefaultExt = "dds";
+      openFileDialogReplacementFile.Title = "Select replacement png file";
+      openFileDialogReplacementFile.Filter = "png files (*.png)|*.png";
+      openFileDialogReplacementFile.DefaultExt = "png";
     }
 
     private void ddGrid_CellContentClick(object sender, DataGridViewCellEventArgs e) {

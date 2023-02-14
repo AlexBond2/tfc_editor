@@ -1,10 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Lzo64;
 using zlib;
 
-namespace PaladinsTfc
-{
+namespace PaladinsTfc {
   class TexHandling
-  {      
+  {
     private static bool logPeekTexData = true;
     private static bool logTexDataMake = false;
     private static bool logTexData = false;
@@ -12,11 +13,64 @@ namespace PaladinsTfc
     private static bool writeTexture = false;
     private static bool compareReplacement = false;
 
-    private static HashSet<int> dumpRange;
-    private static Dictionary<int,string> id2replacement;
+    const int magicIdDXT1 = 0x31545844; //DXT1
+    const int magicIdDXT5 = 0x35545844; //DXT5
 
-    private static string GLOB_OutPath;
-    private static string compressionMode;
+    public static ReplacementCreator.Encoding encodingFromMagic(int i) {
+      switch (i) {
+        case magicIdDXT1:
+          return ReplacementCreator.Encoding.DXT1;
+        case magicIdDXT5:
+          return ReplacementCreator.Encoding.DXT5;
+        default:
+          string s = Encoding.ASCII.GetString(
+            BitConverter.GetBytes(i).Reverse().ToArray()
+          );
+          throw new ArgumentException($"can not understand format {s}");
+      }
+    }
+
+    private string globalOutDir;
+    private string inFile;
+    private bool dumpEverything;
+    private Dictionary<int, CLIOp> id2op;
+    private CompressionMode.Modes defaultCompressionMode = CompressionMode.Modes.LZO;
+
+    public class CompressionMode {
+      public enum Modes {
+        None, LZO, ZLib
+      }
+      public static Modes fromString(string str) {
+        switch (str.ToUpper()) {
+          case "NONE":
+            return Modes.None;
+          case "LZO":
+            return Modes.LZO;
+          case "ZLIB":
+            return Modes.ZLib;
+          default:
+            throw new ArgumentException($"{str} is not a valid format");
+        }
+      }
+    }
+    public enum ReplacementTextureReader {
+      Raw, Png, Dds
+    }
+    public struct CLIReplacement {
+      public string replacementPath;
+      public ReplacementTextureReader reader;
+    }
+    public class CLIOp {
+      public bool dump;
+      public CompressionMode.Modes? overrideCompressMode;
+      public CLIReplacement? replacement;
+
+      public CLIOp(bool dump) {
+        this.dump = dump;
+        this.overrideCompressMode = null;
+        this.replacement = null;
+      }
+    }
 
     public class TexBlock {
       public long loc_compressedSize;
@@ -45,13 +99,24 @@ namespace PaladinsTfc
       public List<Tex> texs;
     }
 
-    private static bool isInDumpRange(int x){
-      if (dumpRange == null) {
+    private bool isInDumpRange(int id){
+      if (dumpEverything) {
         return true;
       } else {
-        return dumpRange.Contains(x);
+        if(id2op.TryGetValue(id, out CLIOp op)) {
+          return op.dump;
+        }
+        return false;
       }      
-    }    
+    }
+    private CompressionMode.Modes getDecompressMode(int id, int compressedSize, int originalSize) {
+      if (id2op.TryGetValue(id, out CLIOp op)) {
+        if(op.overrideCompressMode.HasValue) {
+          return op.overrideCompressMode.Value;
+        }
+      }
+      return defaultCompressionMode;
+    }
     private static bool tryRead(BinaryReader reader){
       try{
         if (reader.ReadUInt32() == 0x9e2a83c1) { //Found start of Texture, some magic header constant
@@ -199,13 +264,7 @@ namespace PaladinsTfc
     }
     
     //this garbage piece of shit code creates CLR memory misalignment something
-    private static void dumpTex(Tex tex, FileStream fs, LZOCompressor lzo, string fileName){
-      int ddsW = 512;
-      int ddsH = 512;
-
-      const int dxt1 = 0x31545844; //DXT1
-      const int dxt5 = 0x35545844; //DXT5
-
+    private void dumpTex(Tex tex, FileStream fs, LZOCompressor lzo, string fileName){
       if (tex.blocks.Count == 1 && tex.blocks[0].originalSize < 0x0800) {
         Console.WriteLine(String.Format("Texture {0} is too small, skipping", tex.id));
         return;
@@ -215,107 +274,17 @@ namespace PaladinsTfc
         return;
       }
 
-      Console.WriteLine(String.Format("Dumping Texture {0}", tex.id));
+      //Console.WriteLine(String.Format("Dumping Texture {0}", tex.id));
 
-      int ddsSize = tex.blocks[0].originalSize;
-      int ddsFormat = -1;
-      switch (tex.blocks.Count) {
-        case 2:
-          ddsW = 512;
-          ddsH = 512;
-          ddsSize = ddsW * ddsH;
-          ddsFormat = dxt5;
-          break;
-        case 4:
-          ddsW = 1024;
-          ddsH = 1024;
-          ddsSize = ddsW * ddsH / 2;
-          ddsFormat = dxt1;
-          break;
-        case 8:
-          ddsW = 1024;
-          ddsH = 1024;
-          ddsSize = ddsW * ddsH;
-          ddsFormat = dxt5;
-          break;
-        case 16:
-          ddsW = 2048;
-          ddsH = 2048;
-          ddsSize = ddsW * ddsH / 2;
-          ddsFormat = dxt1;
-          break;
-        case 32:
-          ddsW = 2048;
-          ddsH = 2048;
-          ddsSize = ddsW * ddsH;
-          ddsFormat = dxt5;
-          break;
-        case 64:
-          ddsW = 4096;
-          ddsH = 4096;
-          ddsSize = ddsW * ddsH / 2;
-          ddsFormat = dxt1;
-          break;
-        case 128:
-          ddsW = 4096;
-          ddsH = 4096;
-          ddsSize = ddsW * ddsH;
-          ddsFormat = dxt5;
-          break;
-        default:
-          switch (ddsSize) {
-            case 0x0800:
-              ddsW = 64;
-              ddsH = 64;
-              ddsSize = ddsW * ddsH / 2;
-              ddsFormat = dxt1;
-              break;
-            case 0x1000:
-              ddsW = 64;
-              ddsH = 64;
-              ddsSize = ddsW * ddsH;
-              ddsFormat = dxt5;
-              break;
-            case 0x2000:
-              ddsW = 128;
-              ddsH = 128;
-              ddsSize = ddsW * ddsH / 2;
-              ddsFormat = dxt1;
-              break;
-            case 0x4000:
-              ddsW = 128;
-              ddsH = 128;
-              ddsSize = ddsW * ddsH;
-              ddsFormat = dxt5;
-              break;
-            case 0x8000:
-              ddsW = 256;
-              ddsH = 256;
-              ddsSize = ddsW * ddsH / 2;
-              ddsFormat = dxt1;
-              break;
-            case 0x10000 :
-              ddsW = 256;
-              ddsH = 256;
-              ddsSize = ddsW * ddsH;
-              ddsFormat = dxt5;
-              break;
-            case 0x20000:
-              ddsW = 512;
-              ddsH = 512;
-              ddsSize = ddsW * ddsH / 2;
-              ddsFormat = dxt1;
-              break;
-            default:
-              Console.WriteLine(String.Format("Texture {0} has non 2^x size, skipping", tex.id));
-              return;
-          }
-          break;
+      bool couldInfer = inferImageProperties(tex, out int? ddsW, out int? ddsH, out int? ddsSize, out int? ddsFormat);
+      if (couldInfer == false) {
+        Console.WriteLine(String.Format("Texture {0} has non 2^x size, fail", tex.id));
+        return;
       }
-        
-      string ddsFormatName = ddsFormat == dxt1 ? "DXT1" : "DXT5";
+              
+      string ddsFormatName = ddsFormat == magicIdDXT1 ? "DXT1" : "DXT5";
       string withoutExtension = Path.GetFileNameWithoutExtension(fileName);
-      string outPath = string.Format(GLOB_OutPath + "/dump/{0}_{1}_{2}x{3}.dds", 
+      string outPath = string.Format(globalOutDir + "/dump/{0}_{1}_{2}x{3}.dds", 
         withoutExtension, 
         tex.id.ToString("d3"),
         ddsW,
@@ -330,17 +299,18 @@ namespace PaladinsTfc
       bwDump.Write(0x20534444); // dwMagic (constant to identify that this is a dds file)
       bwDump.Write(0x7c);       // header
       bwDump.Write(0x1007);     // header DX10
-      bwDump.Write(ddsH);
-      bwDump.Write(ddsW);
-      bwDump.Write(ddsSize);
+      bwDump.Write(ddsH.Value);
+      bwDump.Write(ddsW.Value);
+      bwDump.Write(ddsSize.Value);
       bwDump.Write(0);
       bwDump.Write(1);
       fsDump.Seek(44L, SeekOrigin.Current);
       bwDump.Write(32);
       bwDump.Write(4);
-      bwDump.Write(ddsFormat);
+      bwDump.Write(ddsFormat.Value);
       fsDump.Seek(40L, SeekOrigin.Current);
 
+      var compressionMode = getDecompressMode(tex.id, tex.blocks[0].compressedSize, tex.blocks[0].originalSize);
       for (int i = 0; i < tex.blocks.Count; ++i) {
         TexBlock block = tex.blocks[i];
         //Console.WriteLine($"Block {i}: [uncompsize={block.originalSize.ToString("x")}, compsize={block.compressedSize.ToString("x")}]");
@@ -350,51 +320,37 @@ namespace PaladinsTfc
         byte[] compressedTextureBlock = new byte[block.compressedSize];
         fs.Read(compressedTextureBlock, 0, block.compressedSize);
         switch (compressionMode) {
-          case "lzo":
+          case CompressionMode.Modes.LZO:
             byte[] buffer = lzo.Decompress(compressedTextureBlock, block.originalSize);
-            fsDump.Write(buffer, 0, buffer.Length);
+            fsDump.Write(buffer, 0, block.originalSize);
             break;
-          case "zlib":
+          case CompressionMode.Modes.ZLib:
             ZOutputStream zoutputStream = new ZOutputStream(fsDump);
             zoutputStream.Write(compressedTextureBlock, 0, block.originalSize);
             zoutputStream.Flush();
             break;
+          case CompressionMode.Modes.None:
+            fsDump.Write(compressedTextureBlock, 0, block.originalSize);
+            break;
           default:
-            throw new Exception("Decompression failure, not lzo, zlib");
+            throw new Exception("Decompression failure, not \"none\", \"lzo\" or \"zlib\"");
         }
       }
+
+      int b0comp = tex.blocks[0].compressedSize;
+      int b0org = tex.blocks[0].originalSize;
+      Console.WriteLine($"Dumping Texture {tex.id} with {compressionMode}. comp:{b0comp}, uncomp:{b0org}");
       GC.Collect();
     }
 
-    private static void dothelzx() {
-      Lzx.LzxDecoder lzx = new Lzx.LzxDecoder(17);
-    }
-      /*
-        mspack_file src, dst;
-        src.buf = CompressedBuffer;
-        src.bufSize = CompressedSize;
-        src.pos = 0;
-        src.rest = 0;
-        dst.buf = UncompressedBuffer;
-        dst.bufSize = UncompressedSize;
-        dst.pos = 0;
-        // prepare decompressor
-        lzxd_stream* lzxd = lzxd_init(&lzxSys, &src, &dst, 17, 0, 256 * 1024, UncompressedSize);
-        assert(lzxd);
-        // decompress
-        int r = lzxd_decompress(lzxd, UncompressedSize);
-        if (r != MSPACK_ERR_OK)
-          appError("lzxd_decompress(%d,%d) returned %d", CompressedSize, UncompressedSize, r);
-        // free resources
-        lzxd_free(lzxd);
-      }*/
-
-      private static void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, string replacementDDSPath) {
+    private void replaceTexture(TFCInfo tfcinfo, FileStream fs, LZOCompressor lzo, int id, CLIReplacement replacement) {
       Tex tex = tfcinfo.texs[id];
       if (tex.id != id)
-        throw new Exception("RedundantDataException, tex id is wrong");
+        throw new Exception("RedundantDataException, tex id is wrong.");
 
-      Console.WriteLine("Replacing tex " + tex.id +  " with " + replacementDDSPath);
+      string path = replacement.replacementPath;
+
+      Console.WriteLine("Replacing tex " + tex.id +  " with " + path);
 
       fs.Seek(tex.loc, SeekOrigin.Begin);
       Console.Write("Replace pre :");
@@ -402,17 +358,42 @@ namespace PaladinsTfc
 
       long loc_texDataStart = tex.blocks[0].loc_texBlockStart;
 
-      foreach(TexBlock block in tex.blocks){ //overwrite whole source data with 0, this is maybe unneccesary but makes the output easier to diagnose
+      //overwrite whole source data with 0, this is maybe unneccesary but makes the output easier to diagnose
+      foreach (TexBlock block in tex.blocks){ 
         fs.Seek(block.loc_texBlockStart, SeekOrigin.Begin);
         fs.Write(new byte[block.compressedSize], 0, block.compressedSize); 
       }
 
-      //TODO? check if dds header is correct
-      FileStream fsImg = new FileStream(replacementDDSPath, FileMode.Open);
+      bool couldInfer = inferImageProperties(tex, out int? ddsW, out int? ddsH, out int? ddsSize, out int? ddsFormat);
+      if (couldInfer == false) {
+        Console.WriteLine(String.Format("Texture {0} has non 2^x size, fail", tex.id));
+        return;
+      }
+      ReplacementCreator.Encoding srcEncoding = encodingFromMagic(ddsFormat.Value);
+
+      ReplacementCreator rc = new ReplacementCreator(path);
+      Stream fsImg = rc.Serialize(ddsW.Value, srcEncoding);
+      int imgLen = checked((int)fsImg.Length) - 0x80;
+
+      //replacement validty
+      {
+        long totalOriginalBytes = 0;
+        foreach (var block in tex.blocks) {
+          totalOriginalBytes += block.originalSize;
+        }
+        if (totalOriginalBytes != imgLen) {
+          long srcLen = File.OpenRead(path).Length;
+          throw new Exception("Texture is not same size even after scaling, Mismatching format or proportions?" +
+            $"\n org:{totalOriginalBytes.ToString("x8")}" +
+            $"\n now:{imgLen.ToString("x8")}" +
+            $"\n srcFile:{srcLen.ToString("x8")}"
+           );
+        }
+      }
+
       //printpeek(fsImg,32);
       fsImg.Seek(0x80, SeekOrigin.Begin);  //strip dds header
       //printpeek(fsImg,32);
-      int imgLen = checked((int)fsImg.Length)-0x80;
       long texWriteLoc = loc_texDataStart;
       int nWrittenBytes = 0;
 
@@ -461,7 +442,7 @@ namespace PaladinsTfc
       fsImg.Close();
 
       if (nWrittenBytes > tex.totalTextureBytes) {
-        throw new Exception("Replacement texture can not be sufficently compressed. Try reducing the noise in the replacement texture"); 
+        throw new Exception($"Image {replacement.replacementPath} can not be compressed to fit in {inFile}:{tex.id}. Try reducing noise or posterising the image");
       }
       fs.Seek(tex.loc_totalTextureBytes, SeekOrigin.Begin); 
       fs.Write(BitConverter.GetBytes(nWrittenBytes), 0, 4);
@@ -478,40 +459,148 @@ namespace PaladinsTfc
         nWrittenBytes.ToString("X8")
       ));
     }
-    
-    public static void run(
-      string inFile, 
-      string outDir, 
-      Dictionary<int,string> 
-      arg_id2replacement, 
-      HashSet<int> arg_dumpRange,
-      string arg_compressionMode
+    public bool inferImageProperties(Tex tex, 
+      [NotNullWhen(true)] out int? ddsW,
+      [NotNullWhen(true)] out int? ddsH,
+      [NotNullWhen(true)] out int? ddsSize,
+      [NotNullWhen(true)] out int? ddsFormat
+    ) {
+      switch (tex.blocks.Count) {
+        case 2:
+          ddsW = 512;
+          ddsH = 512;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = magicIdDXT5;
+          break;
+        case 4:
+          ddsW = 1024;
+          ddsH = 1024;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = magicIdDXT1;
+          break;
+        case 8:
+          ddsW = 1024;
+          ddsH = 1024;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = magicIdDXT5;
+          break;
+        case 16:
+          ddsW = 2048;
+          ddsH = 2048;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = magicIdDXT1;
+          break;
+        case 32:
+          ddsW = 2048;
+          ddsH = 2048;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = magicIdDXT5;
+          break;
+        case 64:
+          ddsW = 4096;
+          ddsH = 4096;
+          ddsSize = ddsW * ddsH / 2;
+          ddsFormat = magicIdDXT1;
+          break;
+        case 128:
+          ddsW = 4096;
+          ddsH = 4096;
+          ddsSize = ddsW * ddsH;
+          ddsFormat = magicIdDXT5;
+          break;
+        default:
+          switch (tex.blocks[0].originalSize) {
+            case 0x0800:
+              ddsW = 64;
+              ddsH = 64;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = magicIdDXT1;
+              break;
+            case 0x1000:
+              ddsW = 64;
+              ddsH = 64;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = magicIdDXT5;
+              break;
+            case 0x2000:
+              ddsW = 128;
+              ddsH = 128;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = magicIdDXT1;
+              break;
+            case 0x4000:
+              ddsW = 128;
+              ddsH = 128;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = magicIdDXT5;
+              break;
+            case 0x8000:
+              ddsW = 256;
+              ddsH = 256;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = magicIdDXT1;
+              break;
+            case 0x10000:
+              ddsW = 256;
+              ddsH = 256;
+              ddsSize = ddsW * ddsH;
+              ddsFormat = magicIdDXT5;
+              break;
+            case 0x20000:
+              ddsW = 512;
+              ddsH = 512;
+              ddsSize = ddsW * ddsH / 2;
+              ddsFormat = magicIdDXT1;
+              break;
+            default:
+              ddsW = null;
+              ddsH = null;
+              ddsFormat = null;
+              ddsSize = null;
+              return false;
+          }
+          break;
+      }
+      return true;
+    }
+
+    public void run(
+      string inFile,
+      string globalOutDir,
+      bool dumpEverything,
+      Dictionary<int, CLIOp> id2op,
+      CompressionMode.Modes defaultCompressionMode = CompressionMode.Modes.LZO
     ){
-      id2replacement = arg_id2replacement;
-      dumpRange = arg_dumpRange;
-      compressionMode = arg_compressionMode;
-      GLOB_OutPath = outDir;
+      this.inFile = inFile;
+      this.globalOutDir = globalOutDir;
+      this.dumpEverything = dumpEverything;
+      this.id2op = id2op;
+      this.defaultCompressionMode = defaultCompressionMode;
 
       TFCInfo tf = getTFCInfo(inFile);
       FileStream fsIn = new FileStream(inFile, FileMode.Open);
 
       if (true){
         LZOCompressor lzo = new LZOCompressor();
-        foreach (Tex tex in tf.texs) {        
-          if(isInDumpRange(tex.id) == false) continue; 
-          dumpTex(tex, fsIn, lzo, inFile);
+        foreach (Tex tex in tf.texs) {
+          if (isInDumpRange(tex.id)) {
+            dumpTex(tex, fsIn, lzo, inFile);
+          }
         }
         fsIn.Close();
       }
       
-      if(id2replacement!=null && id2replacement.Count() > 0){
+      if(id2op != null && id2op.Count() > 0){
         LZOCompressor lzo = new LZOCompressor(); // NEVER EVER EVER SHARE LZOCompressor from dump
-        string outFile = GLOB_OutPath+ "/edited/" + Path.GetFileName(inFile);
+        string outFile = globalOutDir + "/edited/" + Path.GetFileName(inFile);
         Directory.CreateDirectory(Path.GetDirectoryName(outFile));
         File.Copy(inFile, outFile, true);
         FileStream fsOut = new FileStream(outFile, FileMode.Open);
-        foreach(KeyValuePair<int, string> kv in id2replacement){
-          replaceTexture(tf, fsOut, lzo, kv.Key, kv.Value);
+        foreach(KeyValuePair<int, CLIOp> kv in id2op) {
+          CLIReplacement? rep = kv.Value.replacement;
+          if(rep.HasValue) {
+            replaceTexture(tf, fsOut, lzo, kv.Key, rep.Value);
+          }
         }
         fsOut.Close();
       }

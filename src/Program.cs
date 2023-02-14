@@ -92,7 +92,7 @@ namespace PaladinsTfc
 
       Option compressionModeOption = new Option<string>(
         aliases: new string[] { "--compression-mode", "-m" },
-        description: "Compression mode\n lzo | zlib"
+        description: "Compression mode\n none | lzo | zlib"
       ); compressionModeOption.Arity = ArgumentArity.ExactlyOne;
       compressionModeOption.SetDefaultValue("lzo");
 
@@ -102,12 +102,12 @@ namespace PaladinsTfc
       
       var rootCommand = new RootCommand();
 
-      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, string directoryStr, string compressionMode) => {
+      openCommand.SetHandler((string inTfcFile , string dumpRangeStr, string replaceStr, string directoryStr, string compressionModeStr) => {
         Console.WriteLine($"The value for inFile is: {inTfcFile}");
         Console.WriteLine($"The value for --dump is: {dumpRangeStr}");
         Console.WriteLine($"The value for --replace is: {replaceStr}");
         Console.WriteLine($"The value for --output-directory is: {directoryStr}");
-        Console.WriteLine($"The value for --compression-mode is: {compressionMode}");
+        Console.WriteLine($"The value for --compression-mode is: {compressionModeStr}");
 
         if (inTfcFile == null) {
           throw new ArgumentException("No file supplied");
@@ -115,17 +115,47 @@ namespace PaladinsTfc
         if (dumpRangeStr == null & replaceStr == null) {
           throw new ArgumentException("Neither dump or replace operation supplied");
         }
-        Dictionary<int, string> id2replacement = getReplacements(replaceStr);
-        HashSet<int> dumpRange = getDumpRange(dumpRangeStr);
-        TexHandling.run(inTfcFile, directoryStr, id2replacement, dumpRange, compressionMode);
+        understandDumpAndReplace(dumpRangeStr, replaceStr, 
+          out bool dumpEverything, out Dictionary<int, TexHandling.CLIOp> id2op
+        );
+        var compression = TexHandling.CompressionMode.fromString(compressionModeStr);
+        TexHandling t = new TexHandling();
+        t.run(inTfcFile, directoryStr, dumpEverything, id2op, compression);
       }, openArgument, dumpOption, replaceOption, outDirectoryOption, compressionModeOption);
       return openCommand;
     }
 
-    private static Dictionary<int, string> getReplacements(string? str){
-      if (str == null || str.Length == 0) return null;
-      
+    private static void understandDumpAndReplace(string dumpRangeStr, string replaceStr,
+      out bool dumpEverything, out Dictionary<int, TexHandling.CLIOp> id2op) {
+
+      HashSet<int>? dumpRange = getDumpRange(dumpRangeStr);
+      Dictionary<int, string> replacement = getReplacements(replaceStr);
+
+      id2op = new Dictionary<int, TexHandling.CLIOp>();
+      if (dumpRange != null) {
+        dumpEverything = false;
+        foreach (var item in dumpRange) {
+          id2op.Add(item, new TexHandling.CLIOp(true));
+        } 
+      } else {
+        dumpEverything = true;
+      }
+
+      foreach (var (id,str) in replacement) {
+        if (!id2op.ContainsKey(id)) {
+          id2op.Add(id, new TexHandling.CLIOp(false));
+        }
+        id2op[id].replacement = new TexHandling.CLIReplacement {
+          replacementPath = str,
+          reader = TexHandling.ReplacementTextureReader.Dds
+        };
+      }
+    }
+    private static Dictionary<int, string> getReplacements(string? str) {
       Dictionary<int, string> id2replacement = new Dictionary<int, string>();
+
+      if (str == null || str.Length == 0) return id2replacement;
+      
       foreach(string s in indirectParse(str)){
         string[] sx = s.Split(":", 2);
         if(sx.Length != 2) 
@@ -139,7 +169,7 @@ namespace PaladinsTfc
       return id2replacement;
     }
 
-    private static HashSet<int> getDumpRange(string? str){
+    private static HashSet<int>? getDumpRange(string? str){
       if (str == null || str.Length == 0) return new HashSet<int>();
 
       HashSet<int> dumpRange = new HashSet<int>();
@@ -147,6 +177,7 @@ namespace PaladinsTfc
       foreach(string s in indirectParse(str)){
         if (s == "*") {
           dumpRange = null;
+          break;
         } else if (s.Contains("-")){
           string[] strNums = s.Split("-");
           if(strNums.Length != 2) 

@@ -19,6 +19,7 @@ using PaladinsTfc;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using CoenM.ImageHash;
+using CoenM.ImageHash.HashAlgorithms;
 
 namespace paladins_tfc.src.gui {
   public partial class SelectorWizard : Form {
@@ -49,11 +50,7 @@ namespace paladins_tfc.src.gui {
       openFileDialogSelectDirectoryCookedReference.Title = "Select Directory Containing Cooked Assets";
 
       persitantData = argPersitantData;
-      textSelectDirectoryCookedReference.Text = persitantData.cookedReferenceDirectory;
-      textSelectFileHashCooked.Text = persitantData.hashesCooked;
       textSelectFileHashTFC.Text = persitantData.hashesTFC;
-      textSelectDirectoryCookedReference.cursorToRight();
-      textSelectFileHashCooked.cursorToRight();
       textSelectFileHashTFC.cursorToRight();
 
       TFCdir = persitantData.inputDirectory;
@@ -207,20 +204,8 @@ namespace paladins_tfc.src.gui {
         this.Width = 1000;
       }
 
-      // reload cookedHashes
-      string? failReason = tryRemakeHashListIfOutdated(cookedHashes, textSelectFileHashCooked.Text, lastCookedHashPath);
-      if (!string.IsNullOrEmpty(failReason)) {
-        failWithSimilarity(failReason);
-        return;
-      };
-      lastCookedHashPath = textSelectFileHashCooked.Text;
-      if (cookedHashes.Count == 0) {
-        failWithSimilarity("Cooked Hashes contains no data");
-        return;
-      }
-
       // reload tfcHashes
-      failReason = tryRemakeHashListIfOutdated(tfcHashes, textSelectFileHashTFC.Text, lastTFCHashPath);
+      string? failReason = tryRemakeHashListIfOutdated(tfcHashes, textSelectFileHashTFC.Text, lastTFCHashPath);
       if (!string.IsNullOrEmpty(failReason)) {
         failWithSimilarity(failReason);
         return;
@@ -231,25 +216,20 @@ namespace paladins_tfc.src.gui {
         return;
       }
 
-      // Ensure Reference directory is loaded
-      if (string.IsNullOrEmpty(textSelectDirectoryCookedReference.Text)) {
-        failWithSimilarity($"No cooked reference directory is defined");
-        return;
-      }
-      string cookedRefDir = textSelectDirectoryCookedReference.Text;
-
       // Cooked image filter
-      if (string.IsNullOrEmpty(textCookedFilter.Text)) {
+      if (string.IsNullOrEmpty(textImageFilter.Text)) {
         failWithSimilarity($"No cooked image filter defined");
         return;
       }
 
+
       // Find cooked Hash
-      string cookedFilterFileName = Path.GetRelativePath(cookedRefDir, textCookedFilter.Text);
-      if (!cookedHashes.TryGetValue(cookedFilterFileName, out ulong cookedHash)) {
-        failWithSimilarity($"Cooked Hashes do not contain a definition for {cookedFilterFileName}");
+      ulong? maybeCookedHash = getFilterImageHash();
+      if (maybeCookedHash.HasValue == false) {
+        failWithSimilarity($"Image filter can't be hashed");
         return;
       }
+      ulong cookedHash = maybeCookedHash.GetValueOrDefault();
 
       // Filter hashes resolution
       IEnumerable<KeyValuePair<string, ulong>> filteredTfcHashes;
@@ -366,7 +346,7 @@ namespace paladins_tfc.src.gui {
     private void invalidateByImageSimilarityListView() {
       var selectedItems = listViewTFC.SelectedItems;
       if (selectedItems.Count == 0) {
-        failWithSimilarity("No Image Selected");
+        failWithSimilarity("No Image(s) Selected From among Previews");
         return;
       }
       if (selectedItems.Count >= 2) {
@@ -423,6 +403,39 @@ namespace paladins_tfc.src.gui {
         Image ret = Image.FromStream(pngStream);
         pngStream.Close();
         return ret;
+      }
+    }
+
+    string lastFilterImagePath;
+    ulong? lastFilterImageHash = null;
+    private ulong? getFilterImageHash() {
+      if(textImageFilter.Text == null) {
+        return null;
+      }
+      if (lastFilterImagePath == textImageFilter.Text) {
+        return lastFilterImageHash;
+      }
+      lastFilterImagePath = textImageFilter.Text;
+
+      string extention = Path.GetExtension(lastFilterImagePath).ToLower();
+      Hashing.ImgType imgtype;
+      switch (extention) {
+        case ".dds":
+          imgtype = Hashing.ImgType.DDS;
+          break;
+        case ".png":
+          imgtype = Hashing.ImgType.PNG;
+          break;
+        default:
+          return null;
+      }
+
+      DifferenceHash hasher = new DifferenceHash();
+      try {
+        return hasher.Hash(Hashing.getImg(lastFilterImagePath, imgtype));
+      } catch {
+        MessageBox.Show($"{lastFilterImagePath} can't be hashed", "ERROR");
+        return null;
       }
     }
 
@@ -494,16 +507,6 @@ namespace paladins_tfc.src.gui {
       invalidateByImageSimilarity();
     }
 
-    private void btnSelectFileHashCooked_Click(object sender, EventArgs e) {
-      if (openFileDialogSelectFileHashCooked.ShowDialog() == DialogResult.OK) {
-        persitantData.hashesCooked = openFileDialogSelectFileHashCooked.FileName;
-        textSelectFileHashCooked.Text = persitantData.hashesCooked;
-        textSelectFileHashCooked.cursorToRight();
-        persitantData.write();
-        invalidateByImageSimilarity();
-      }
-    }
-
     private void btnSelectFileHashTFC_Click(object sender, EventArgs e) {
       if (openFileDialogSelectFileHashTFC.ShowDialog() == DialogResult.OK) {
         persitantData.hashesTFC = openFileDialogSelectFileHashTFC.FileName;
@@ -511,40 +514,6 @@ namespace paladins_tfc.src.gui {
         textSelectFileHashTFC.cursorToRight();
         persitantData.write();
         invalidateByImageSimilarity();
-      }
-    }
-
-    private void btnSelectDirectoryCookedReference_Click(object sender, EventArgs e) {
-      if (openFileDialogSelectDirectoryCookedReference.ShowDialog() == CommonFileDialogResult.Ok) {
-        persitantData.cookedReferenceDirectory = openFileDialogSelectDirectoryCookedReference.FileName;
-        textSelectDirectoryCookedReference.Text = persitantData.cookedReferenceDirectory;
-        textSelectDirectoryCookedReference.cursorToRight();
-        persitantData.write();
-      }
-    }
-
-    private void btnGenerateHashCooked_Click(object sender, EventArgs e) {
-      string hashDir = textSelectDirectoryCookedReference.Text;
-      string outDir = persitantData.outputDirectory;
-      if (string.IsNullOrEmpty(hashDir)) {
-        MessageBox.Show("Error", "Error, \"Cooked Reference Directory\" not set.");
-        return;
-      }
-      if (string.IsNullOrEmpty(outDir)) {
-        MessageBox.Show("Error", "Error, \"Output Directory\" not set.");
-        return;
-      }
-
-      DialogResult dr = MessageBox.Show($"Generate hash table based of directory: {hashDir}?", "Info", MessageBoxButtons.OKCancel);
-      if (dr == DialogResult.OK) {
-        var command = new List<string>() {
-        "hash", "cooked", hashDir, "--output-directory", outDir
-        };
-        parentGui.Focus();
-        this.Hide();
-        Extentions.invokeSomeway(this.parentGui, new MethodInvoker(() => {
-          parentGui.runCommands(new List<List<string>>() { command });
-        }));
       }
     }
 
@@ -599,20 +568,18 @@ namespace paladins_tfc.src.gui {
     }
 
     private void btnCookedFilterBrowse_Click(object sender, EventArgs e) {
-      string lastFilter = textCookedFilter.Text;
-      if (string.IsNullOrEmpty(lastFilter)) {
-        openFileDialogCookedFilter.InitialDirectory = textSelectDirectoryCookedReference.Text;
-      } else {
-        openFileDialogCookedFilter.InitialDirectory = Path.GetDirectoryName(lastFilter);
-      }
-      if (openFileDialogCookedFilter.ShowDialog() == DialogResult.OK) {
-        textCookedFilter.Text = openFileDialogCookedFilter.FileName;
-        textCookedFilter.cursorToRight();
+      string lastFilter = textImageFilter.Text;
+      if (string.IsNullOrEmpty(lastFilter) == false) {
+        openFileDialogImgFilter.InitialDirectory = Path.GetDirectoryName(lastFilter);
+      } 
+      if (openFileDialogImgFilter.ShowDialog() == DialogResult.OK) {
+        textImageFilter.Text = openFileDialogImgFilter.FileName;
+        textImageFilter.cursorToRight();
 
         try {
-          Image img = Image.FromFile(textCookedFilter.Text);
-          pictureCooked.SizeMode = PictureBoxSizeMode.Zoom;
-          pictureCooked.Image = img;
+          Image img = Image.FromFile(textImageFilter.Text);
+          pictureImgFilter.SizeMode = PictureBoxSizeMode.Zoom;
+          pictureImgFilter.Image = img;
         } catch {
           MessageBox.Show("Image can't be loaded");
           return;
@@ -622,8 +589,6 @@ namespace paladins_tfc.src.gui {
     }
 
     private void SelectorWizard_FormClosing(object sender, FormClosingEventArgs e) {
-      persitantData.cookedReferenceDirectory = textSelectDirectoryCookedReference.Text;
-      persitantData.hashesCooked = textSelectFileHashCooked.Text;
       persitantData.hashesTFC = textSelectFileHashTFC.Text;
       persitantData.write();
 

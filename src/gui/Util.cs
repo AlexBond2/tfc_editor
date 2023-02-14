@@ -34,8 +34,6 @@ namespace PaladinsTfcExtend
     public string inputDirectory { get; set; }
     public string outputDirectory { get; set; }
     public string hashesTFC { get; set; }
-    public string hashesCooked { get; set; }
-    public string cookedReferenceDirectory { get; set; }
     private PersitantData() {
     }
     public static PersitantData load() {
