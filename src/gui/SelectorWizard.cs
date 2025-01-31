@@ -177,7 +177,7 @@ namespace paladins_tfc.src.gui {
 
       string idSelector = "";
       if (selectorPattern.Count >= 1) {
-        idSelector = "#" + string.Join(",", selectorPattern.ToArray());
+        idSelector = ":" + string.Join(",", selectorPattern.ToArray());
       }
       succeedWith(textPreviewFilenameAndId, selectedPath + idSelector);
     }

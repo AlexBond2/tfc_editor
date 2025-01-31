@@ -30,8 +30,8 @@ namespace PaladinsTfc {
       var magicEnc = asMagicEncoding(encoding);
       using (MagickImage im = new MagickImage(img)) { 
         int newW = width;
-        int newH = (im.Height * newW) / im.Width;
-        im.Resize(newW, newH);
+        int newH = ((int)im.Height * newW) / (int)im.Width;
+        im.Resize((uint)newW, (uint)newH);
         im.Format = magicEnc;
         im.Settings.SetDefine(magicEnc, "mipmaps", "0");
         im.Write("tempshit.dds");
